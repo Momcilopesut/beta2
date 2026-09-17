@@ -228,6 +228,8 @@
 
     var streak = computeStreak();
     document.getElementById("streak").textContent = streak > 0 ? streak + " day streak" : "";
+
+    if (timeGrid) timeGrid.refresh();
   }
 
   function setupTabs() {
@@ -249,23 +251,47 @@
     return slots;
   }
 
+  function takenSlots() {
+    var taken = {};
+    getTasks(tomorrowKey()).forEach(function (task) {
+      (task.times || []).forEach(function (t) { taken[t] = true; });
+    });
+    return taken;
+  }
+
   function setupTimeGrid() {
     var grid = document.getElementById("time-grid");
     var summary = document.getElementById("time-summary");
     var selected = {};
-
-    allSlots().forEach(function (slot) {
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "time-slot";
-      btn.dataset.time = slot;
-      btn.textContent = formatTime(slot);
-      grid.appendChild(btn);
-    });
+    var lastKey = tomorrowKey();
 
     function updateSummary() {
       var times = Object.keys(selected);
       summary.textContent = times.length ? formatTimes(times) : "No time selected";
+    }
+
+    // Rebuilds the grid from scratch, leaving out any slot a task for
+    // tomorrow already occupies.
+    function renderGrid() {
+      var currentKey = tomorrowKey();
+      if (currentKey !== lastKey) {
+        lastKey = currentKey;
+        selected = {};
+      }
+      var taken = takenSlots();
+      grid.innerHTML = "";
+      allSlots().forEach(function (slot) {
+        if (taken[slot]) {
+          delete selected[slot];
+          return;
+        }
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "time-slot" + (selected[slot] ? " selected" : "");
+        btn.dataset.time = slot;
+        btn.textContent = formatTime(slot);
+        grid.appendChild(btn);
+      });
     }
 
     grid.addEventListener("click", function (e) {
@@ -288,19 +314,24 @@
 
     function reset() {
       selected = {};
-      grid.querySelectorAll(".time-slot.selected").forEach(function (b) { b.classList.remove("selected"); });
+      renderGrid();
       updateSummary();
     }
 
+    renderGrid();
     updateSummary();
 
     return {
       getSelected: function () { return Object.keys(selected); },
-      reset: reset
+      reset: reset,
+      refresh: function () {
+        renderGrid();
+        updateSummary();
+      }
     };
   }
 
-  function setupPlanForm(timeGrid) {
+  function setupPlanForm() {
     var form = document.getElementById("plan-form");
     var input = document.getElementById("plan-input");
     var categoryInput = document.getElementById("plan-category");
@@ -328,8 +359,9 @@
     }, 60000);
   }
 
+  var timeGrid = setupTimeGrid();
   setupTabs();
-  setupPlanForm(setupTimeGrid());
+  setupPlanForm();
   watchForDateChange();
   render();
 })();
