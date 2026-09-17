@@ -110,11 +110,6 @@ body {
   border-radius: 4px;
 }
 
-.add-form input[type="time"] {
-  color-scheme: light dark;
-  width: 110px;
-}
-
 .add-form select {
   padding: 10px 12px;
   border: 1px solid var(--line);
@@ -128,6 +123,12 @@ body {
 .add-form select:focus {
   outline: none;
   border-color: var(--line-strong);
+}
+
+.time-slot:focus-visible,
+#time-clear:focus-visible {
+  outline: 2px solid var(--line-strong);
+  outline-offset: 1px;
 }
 
 .add-form button {
@@ -172,6 +173,61 @@ body {
   color: var(--muted);
   flex-shrink: 0;
   min-width: 68px;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-block {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.time-block-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+#time-clear {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+#time-clear:hover {
+  color: var(--fg);
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.time-slot {
+  padding: 6px 4px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-slot.selected {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
 }
 
 .task-category {

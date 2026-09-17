@@ -30,7 +30,6 @@
         <div class="view-meta" id="plan-date"></div>
         <form id="plan-form" class="add-form">
           <input type="text" id="plan-input" placeholder="Add a task for tomorrow" autocomplete="off">
-          <input type="time" id="plan-time" aria-label="Time (optional)">
           <select id="plan-category" aria-label="Category">
             <option value="">No category</option>
             <option value="Work">Work</option>
@@ -40,6 +39,13 @@
           </select>
           <button type="submit">Add</button>
         </form>
+        <div class="time-block">
+          <div class="time-block-header">
+            <span id="time-summary">No time selected</span>
+            <button type="button" id="time-clear">Clear</button>
+          </div>
+          <div class="time-grid" id="time-grid"></div>
+        </div>
         <ul class="task-list" id="plan-list"></ul>
         <p class="empty-state" id="plan-empty">Nothing planned yet.</p>
       </section>
