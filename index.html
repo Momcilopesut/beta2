@@ -31,6 +31,13 @@
         <form id="plan-form" class="add-form">
           <input type="text" id="plan-input" placeholder="Add a task for tomorrow" autocomplete="off">
           <input type="time" id="plan-time" aria-label="Time (optional)">
+          <select id="plan-category" aria-label="Category">
+            <option value="">No category</option>
+            <option value="Work">Work</option>
+            <option value="Health">Health</option>
+            <option value="Personal">Personal</option>
+            <option value="Learning">Learning</option>
+          </select>
           <button type="submit">Add</button>
         </form>
         <ul class="task-list" id="plan-list"></ul>

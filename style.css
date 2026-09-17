@@ -115,7 +115,17 @@ body {
   width: 110px;
 }
 
-.add-form input:focus {
+.add-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.add-form input:focus,
+.add-form select:focus {
   outline: none;
   border-color: var(--line-strong);
 }
@@ -162,6 +172,17 @@ body {
   color: var(--muted);
   flex-shrink: 0;
   min-width: 68px;
+}
+
+.task-category {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 2px 6px;
+  flex-shrink: 0;
 }
 
 .task-item.done .task-text {

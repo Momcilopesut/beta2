@@ -66,12 +66,13 @@
     return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   }
 
-  function addTask(key, text, time) {
+  function addTask(key, text, time, category) {
     if (!data.days[key]) data.days[key] = [];
     data.days[key].push({
       id: String(Date.now()) + Math.random().toString(36).slice(2),
       text: text,
       time: time || null,
+      category: category || null,
       done: false
     });
     save(data);
@@ -135,6 +136,13 @@
       timeEl.textContent = formatTime(task.time);
       li.appendChild(timeEl);
 
+      if (task.category) {
+        var categoryEl = document.createElement("span");
+        categoryEl.className = "task-category";
+        categoryEl.textContent = task.category;
+        li.appendChild(categoryEl);
+      }
+
       var span = document.createElement("span");
       span.className = "task-text";
       span.textContent = task.text;
@@ -188,13 +196,15 @@
     var form = document.getElementById("plan-form");
     var input = document.getElementById("plan-input");
     var timeInput = document.getElementById("plan-time");
+    var categoryInput = document.getElementById("plan-category");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var text = input.value.trim();
       if (!text) return;
-      addTask(tomorrowKey(), text, timeInput.value);
+      addTask(tomorrowKey(), text, timeInput.value, categoryInput.value);
       input.value = "";
       timeInput.value = "";
+      categoryInput.value = "";
       render();
     });
   }
