@@ -93,16 +93,26 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.add-form input[type="text"] {
+  flex: 1;
+  min-width: 120px;
 }
 
 .add-form input {
-  flex: 1;
   padding: 10px 12px;
   border: 1px solid var(--line);
   background: var(--bg);
   color: var(--fg);
   font-size: 14px;
   border-radius: 4px;
+}
+
+.add-form input[type="time"] {
+  color-scheme: light dark;
+  width: 110px;
 }
 
 .add-form input:focus {
@@ -145,6 +155,13 @@ body {
   flex: 1;
   font-size: 15px;
   word-break: break-word;
+}
+
+.task-time {
+  font-size: 13px;
+  color: var(--muted);
+  flex-shrink: 0;
+  min-width: 68px;
 }
 
 .task-item.done .task-text {

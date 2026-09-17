@@ -44,9 +44,36 @@
     return data.days[key] || [];
   }
 
-  function addTask(key, text) {
+  // Timed tasks sort chronologically first; untimed tasks keep their
+  // add order and fall after all timed ones.
+  function sortedTasks(key) {
+    return getTasks(key)
+      .map(function (t, i) { return { t: t, i: i }; })
+      .sort(function (a, b) {
+        if (a.t.time && b.t.time) return a.t.time < b.t.time ? -1 : a.t.time > b.t.time ? 1 : a.i - b.i;
+        if (a.t.time) return -1;
+        if (b.t.time) return 1;
+        return a.i - b.i;
+      })
+      .map(function (x) { return x.t; });
+  }
+
+  function formatTime(time) {
+    if (!time) return "";
+    var parts = time.split(":");
+    var d = new Date();
+    d.setHours(Number(parts[0]), Number(parts[1]), 0, 0);
+    return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  }
+
+  function addTask(key, text, time) {
     if (!data.days[key]) data.days[key] = [];
-    data.days[key].push({ id: String(Date.now()) + Math.random().toString(36).slice(2), text: text, done: false });
+    data.days[key].push({
+      id: String(Date.now()) + Math.random().toString(36).slice(2),
+      text: text,
+      time: time || null,
+      done: false
+    });
     save(data);
   }
 
@@ -84,7 +111,7 @@
   }
 
   function renderList(listEl, emptyEl, key, showCheckbox) {
-    var tasks = getTasks(key);
+    var tasks = sortedTasks(key);
     listEl.innerHTML = "";
     emptyEl.style.display = tasks.length === 0 ? "block" : "none";
 
@@ -102,6 +129,11 @@
         });
         li.appendChild(checkbox);
       }
+
+      var timeEl = document.createElement("span");
+      timeEl.className = "task-time";
+      timeEl.textContent = formatTime(task.time);
+      li.appendChild(timeEl);
 
       var span = document.createElement("span");
       span.className = "task-text";
@@ -155,12 +187,14 @@
   function setupPlanForm() {
     var form = document.getElementById("plan-form");
     var input = document.getElementById("plan-input");
+    var timeInput = document.getElementById("plan-time");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var text = input.value.trim();
       if (!text) return;
-      addTask(tomorrowKey(), text);
+      addTask(tomorrowKey(), text, timeInput.value);
       input.value = "";
+      timeInput.value = "";
       render();
     });
   }
