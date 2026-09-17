@@ -29,15 +29,20 @@
       <section id="view-plan" class="view">
         <div class="view-meta" id="plan-date"></div>
         <form id="plan-form" class="add-form">
-          <input type="text" id="plan-input" placeholder="Add a task for tomorrow" autocomplete="off">
-          <select id="plan-category" aria-label="Category">
-            <option value="">No category</option>
-            <option value="Work">Work</option>
-            <option value="Health">Health</option>
-            <option value="Personal">Personal</option>
-            <option value="Learning">Learning</option>
-          </select>
-          <button type="submit">Add</button>
+          <div class="add-form-row">
+            <select id="plan-category" aria-label="Category">
+              <option value="">No category</option>
+              <option value="Work">Work</option>
+              <option value="Health">Health</option>
+              <option value="Personal">Personal</option>
+              <option value="Learning">Learning</option>
+            </select>
+            <select id="plan-suggestion" aria-label="Suggested task" hidden></select>
+          </div>
+          <div class="add-form-row">
+            <input type="text" id="plan-input" placeholder="Add a task for tomorrow" autocomplete="off">
+            <button type="submit">Add</button>
+          </div>
         </form>
         <div class="time-block">
           <div class="time-block-header">
@@ -50,6 +55,17 @@
         <p class="empty-state" id="plan-empty">Nothing planned yet.</p>
       </section>
     </main>
+
+    <footer class="inspiration">
+      <div class="figure">
+        <div class="figure-art" id="figure-art"></div>
+        <p class="figure-caption" id="figure-caption"></p>
+      </div>
+      <blockquote class="quote">
+        <p id="quote-text"></p>
+        <cite id="quote-author"></cite>
+      </blockquote>
+    </footer>
   </div>
 
   <script src="app.js"></script>

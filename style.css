@@ -91,8 +91,14 @@ body {
 
 .add-form {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
+}
+
+.add-form-row {
+  display: flex;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -265,4 +271,64 @@ body {
   font-size: 14px;
   padding: 24px 0;
   text-align: center;
+}
+
+.inspiration {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.figure-art {
+  width: 52px;
+  height: 52px;
+  color: var(--muted);
+}
+
+.figure-art svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.figure-caption {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 300px;
+}
+
+.figure-caption strong {
+  color: var(--fg);
+}
+
+.quote {
+  margin: 0;
+  max-width: 320px;
+}
+
+.quote p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.quote cite {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: normal;
 }

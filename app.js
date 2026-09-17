@@ -331,7 +331,64 @@
     };
   }
 
-  function setupPlanForm() {
+  var SUGGESTIONS = {
+    Work: ["Deep work block", "Respond to emails", "Team check-in", "Plan tomorrow's priorities"],
+    Health: ["Workout", "Prep a healthy meal", "Stretch / mobility", "Get to bed on time"],
+    Personal: ["Call a friend or family member", "Tidy up a space", "Run an errand", "Free time / hobby"],
+    Learning: ["Read for 30 minutes", "Practice a skill", "Watch a course lesson", "Journal / review notes"]
+  };
+  var OTHER_VALUE = "__other__";
+
+  // Once a category is picked, offers 4 suggested tasks for it plus
+  // "Other"; picking a suggestion fills the task name for you.
+  function setupCategoryPicker() {
+    var categorySelect = document.getElementById("plan-category");
+    var suggestionSelect = document.getElementById("plan-suggestion");
+    var textInput = document.getElementById("plan-input");
+
+    function populate() {
+      var options = SUGGESTIONS[categorySelect.value];
+      suggestionSelect.innerHTML = "";
+      if (!options) {
+        suggestionSelect.hidden = true;
+        return;
+      }
+      options.forEach(function (text) {
+        var opt = document.createElement("option");
+        opt.value = text;
+        opt.textContent = text;
+        suggestionSelect.appendChild(opt);
+      });
+      var other = document.createElement("option");
+      other.value = OTHER_VALUE;
+      other.textContent = "Other";
+      suggestionSelect.appendChild(other);
+      suggestionSelect.hidden = false;
+      suggestionSelect.value = options[0];
+      textInput.value = options[0];
+    }
+
+    categorySelect.addEventListener("change", populate);
+
+    suggestionSelect.addEventListener("change", function () {
+      if (suggestionSelect.value === OTHER_VALUE) {
+        textInput.value = "";
+        textInput.focus();
+      } else {
+        textInput.value = suggestionSelect.value;
+      }
+    });
+
+    return {
+      reset: function () {
+        categorySelect.value = "";
+        suggestionSelect.hidden = true;
+        suggestionSelect.innerHTML = "";
+      }
+    };
+  }
+
+  function setupPlanForm(categoryPicker) {
     var form = document.getElementById("plan-form");
     var input = document.getElementById("plan-input");
     var categoryInput = document.getElementById("plan-category");
@@ -341,7 +398,7 @@
       if (!text) return;
       addTask(tomorrowKey(), text, timeGrid.getSelected(), categoryInput.value);
       input.value = "";
-      categoryInput.value = "";
+      categoryPicker.reset();
       timeGrid.reset();
       render();
     });
@@ -355,13 +412,133 @@
       if (key !== currentKey) {
         currentKey = key;
         render();
+        renderInspiration();
       }
     }, 60000);
   }
 
+  var FIGURES = [
+    {
+      name: "Leonardo da Vinci",
+      idea: "Vitruvian Man, the proportions of the human body",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="24"/><rect x="10" y="10" width="44" height="44"/><line x1="32" y1="8" x2="32" y2="56"/><line x1="8" y1="32" x2="56" y2="32"/></svg>'
+    },
+    {
+      name: "Isaac Newton",
+      idea: "Universal gravitation",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="26" cy="22" r="12"/><line x1="27" y1="10" x2="30" y2="4"/><path d="M8 46c8-10 40-10 48 0"/></svg>'
+    },
+    {
+      name: "Marie Curie",
+      idea: "Radioactivity",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="3" fill="currentColor" stroke="none"/><ellipse cx="32" cy="32" rx="26" ry="10"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(120 32 32)"/></svg>'
+    },
+    {
+      name: "Nikola Tesla",
+      idea: "Alternating current",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M6 32c6-16 12-16 18 0s12 16 18 0 12-16 16 0"/></svg>'
+    },
+    {
+      name: "Ada Lovelace",
+      idea: "The first published algorithm",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 24h16a10 10 0 0 1 0 20H24"/><path d="M30 38l-8 6 8 6"/></svg>'
+    },
+    {
+      name: "Buckminster Fuller",
+      idea: "The geodesic dome",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 48a24 24 0 0 1 48 0"/><line x1="8" y1="48" x2="56" y2="48"/><line x1="20" y1="48" x2="32" y2="24"/><line x1="44" y1="48" x2="32" y2="24"/><line x1="14" y1="48" x2="32" y2="30"/><line x1="50" y1="48" x2="32" y2="30"/></svg>'
+    },
+    {
+      name: "Frank Lloyd Wright",
+      idea: "Organic architecture",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="22" x2="50" y2="22"/><line x1="14" y1="32" x2="58" y2="32"/><line x1="6" y1="42" x2="50" y2="42"/><line x1="20" y1="14" x2="20" y2="50"/></svg>'
+    },
+    {
+      name: "Zaha Hadid",
+      idea: "Fluid, curving architecture",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 50c0-16 30-4 30-20s10-12 10-18"/></svg>'
+    },
+    {
+      name: "Antoni Gaudi",
+      idea: "The Sagrada Familia",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 52V26l6-16 6 16v26"/><path d="M38 52V32l5-12 5 12v20"/><line x1="12" y1="52" x2="52" y2="52"/></svg>'
+    },
+    {
+      name: "Imhotep",
+      idea: "The step pyramid",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="42" width="48" height="8"/><rect x="14" y="34" width="36" height="8"/><rect x="20" y="26" width="24" height="8"/><rect x="26" y="18" width="12" height="8"/></svg>'
+    },
+    {
+      name: "Euclid",
+      idea: "Geometry, in The Elements",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 8l-14 16M32 8l14 16"/><path d="M12 52h40l-20-28z"/></svg>'
+    },
+    {
+      name: "Archimedes",
+      idea: "The lever and buoyancy",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="8" y1="28" x2="56" y2="40"/><path d="M32 34l-4 8h8z"/><circle cx="12" cy="24" r="4"/><circle cx="52" cy="44" r="6"/></svg>'
+    },
+    {
+      name: "Charles Darwin",
+      idea: "Evolution by natural selection",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 56V32M32 32L18 16M32 32l14-16M32 40L14 28M32 40l18-12"/></svg>'
+    },
+    {
+      name: "Alan Turing",
+      idea: "The Turing machine",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="30" width="48" height="12"/><line x1="20" y1="30" x2="20" y2="42"/><line x1="32" y1="30" x2="32" y2="42"/><line x1="44" y1="30" x2="44" y2="42"/><path d="M32 30v-8"/><rect x="26" y="14" width="12" height="8"/></svg>'
+    },
+    {
+      name: "Pythagoras",
+      idea: "The Pythagorean theorem",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 12L12 52L52 52Z"/><rect x="3" y="12" width="8" height="40"/><rect x="12" y="53" width="40" height="8"/></svg>'
+    },
+    {
+      name: "Galileo Galilei",
+      idea: "Heliocentrism",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="6" fill="currentColor" stroke="none"/><ellipse cx="32" cy="32" rx="26" ry="12"/><circle cx="58" cy="32" r="3" fill="currentColor" stroke="none"/></svg>'
+    }
+  ];
+
+  var QUOTES = [
+    { text: "By failing to prepare, you are preparing to fail.", author: "Benjamin Franklin" },
+    { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+    { text: "Well done is better than well said.", author: "Benjamin Franklin" },
+    { text: "Energy and persistence conquer all things.", author: "Benjamin Franklin" },
+    { text: "Lost time is never found again.", author: "Benjamin Franklin" },
+    { text: "The best investment you can make is in yourself.", author: "Warren Buffett" },
+    { text: "It takes 20 years to build a reputation and five minutes to ruin it.", author: "Warren Buffett" },
+    { text: "Risk comes from not knowing what you're doing.", author: "Warren Buffett" },
+    { text: "Someone's sitting in the shade today because someone planted a tree a long time ago.", author: "Warren Buffett" },
+    { text: "The big money is not in the buying and the selling, but in the waiting.", author: "Charlie Munger" },
+    { text: "Spend each day trying to be a little wiser than you were when you woke up.", author: "Charlie Munger" },
+    { text: "Knowing what you don't know is more useful than being brilliant.", author: "Charlie Munger" },
+    { text: "You have power over your mind, not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius" },
+    { text: "We suffer more in imagination than in reality.", author: "Seneca" },
+    { text: "Efficiency is doing things right; effectiveness is doing the right things.", author: "Peter Drucker" }
+  ];
+
+  function dayOfYear(d) {
+    var start = new Date(d.getFullYear(), 0, 0);
+    return Math.floor((d - start) / 86400000);
+  }
+
+  // Rotates the featured figure and quote once per day, deterministically.
+  function renderInspiration() {
+    var day = dayOfYear(new Date());
+    var figure = FIGURES[day % FIGURES.length];
+    var quote = QUOTES[day % QUOTES.length];
+
+    document.getElementById("figure-art").innerHTML = figure.svg;
+    document.getElementById("figure-caption").innerHTML = "<strong>" + figure.name + "</strong> — " + figure.idea;
+    document.getElementById("quote-text").textContent = "“" + quote.text + "”";
+    document.getElementById("quote-author").textContent = "— " + quote.author;
+  }
+
   var timeGrid = setupTimeGrid();
   setupTabs();
-  setupPlanForm();
+  setupPlanForm(setupCategoryPicker());
   watchForDateChange();
   render();
+  renderInspiration();
 })();
