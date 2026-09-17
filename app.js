@@ -497,6 +497,96 @@
       name: "Galileo Galilei",
       idea: "Heliocentrism",
       svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="6" fill="currentColor" stroke="none"/><ellipse cx="32" cy="32" rx="26" ry="12"/><circle cx="58" cy="32" r="3" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      name: "Michelangelo",
+      idea: "The Sistine Chapel ceiling",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 20c10 4 16 10 20 16"/><path d="M56 44c-10-4-16-10-20-16"/></svg>'
+    },
+    {
+      name: "Vincent van Gogh",
+      idea: "The Starry Night",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M40 24c6 2 8 8 4 12s-12 2-12-4 8-10 14-6-2 16-10 14-12-10-6-18"/></svg>'
+    },
+    {
+      name: "Pablo Picasso",
+      idea: "Cubism",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M16 44V20l16-8 16 8v24l-16 8z"/><line x1="16" y1="20" x2="32" y2="32"/><line x1="48" y1="20" x2="32" y2="32"/><line x1="32" y1="32" x2="32" y2="52"/></svg>'
+    },
+    {
+      name: "Claude Monet",
+      idea: "Water Lilies, and Impressionism",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="36" rx="12" ry="6"/><path d="M10 46c8 4 36 4 44 0"/><path d="M14 52c8 3 28 3 36 0"/></svg>'
+    },
+    {
+      name: "M.C. Escher",
+      idea: "Impossible constructions and tessellation",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 8l20 34H12z"/><path d="M32 24l12 20H20z"/></svg>'
+    },
+    {
+      name: "Katsushika Hokusai",
+      idea: "The Great Wave",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M6 44c10-2 14-10 10-16-3-4-9-3-9 2 0 6 8 8 14 4"/><path d="M6 50c14 4 34 4 48-2"/></svg>'
+    },
+    {
+      name: "I.M. Pei",
+      idea: "The Louvre Pyramid",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 12L8 50h48z"/><line x1="32" y1="12" x2="32" y2="50"/><line x1="20" y1="50" x2="32" y2="27"/><line x1="44" y1="50" x2="32" y2="27"/></svg>'
+    },
+    {
+      name: "Le Corbusier",
+      idea: "Villa Savoye, architecture on stilts",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="20" width="44" height="16"/><line x1="16" y1="36" x2="16" y2="52"/><line x1="32" y1="36" x2="32" y2="52"/><line x1="48" y1="36" x2="48" y2="52"/></svg>'
+    },
+    {
+      name: "Eero Saarinen",
+      idea: "The Gateway Arch",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 52C12 24 22 10 32 10s20 14 20 42"/></svg>'
+    },
+    {
+      name: "Christopher Wren",
+      idea: "St. Paul's Cathedral dome",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 44a20 16 0 0 1 40 0"/><line x1="8" y1="44" x2="56" y2="44"/><line x1="32" y1="12" x2="32" y2="20"/><line x1="28" y1="14" x2="36" y2="14"/></svg>'
+    },
+    {
+      name: "Louis Sullivan",
+      idea: "“Form follows function,” the early skyscraper",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="18" y="8" width="28" height="44"/><line x1="18" y1="18" x2="46" y2="18"/><line x1="18" y1="28" x2="46" y2="28"/><line x1="18" y1="38" x2="46" y2="38"/><line x1="32" y1="52" x2="32" y2="58"/></svg>'
+    },
+    {
+      name: "Albert Einstein",
+      idea: "The theory of relativity",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M6 20c12 4 18 4 26 0s16-4 26 0"/><path d="M6 32c12 6 18 6 26 0s16-6 26 0"/><path d="M6 44c12 4 18 4 26 0s16-4 26 0"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      name: "Rosalind Franklin",
+      idea: "The structure of DNA",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M20 6c-8 8-8 16 0 24s8 16 0 24"/><path d="M44 6c8 8 8 16 0 24s-8 16 0 24"/><line x1="20" y1="14" x2="44" y2="14"/><line x1="18" y1="30" x2="46" y2="30"/><line x1="20" y1="46" x2="44" y2="46"/></svg>'
+    },
+    {
+      name: "Louis Pasteur",
+      idea: "Germ theory",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M26 8h12v14l12 24a4 4 0 0 1-4 6H18a4 4 0 0 1-4-6l12-24z"/><line x1="24" y1="8" x2="40" y2="8"/><line x1="20" y1="38" x2="44" y2="38"/></svg>'
+    },
+    {
+      name: "Michael Faraday",
+      idea: "Electromagnetic induction",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 12v40"/><path d="M20 12c8 0 8 8 0 8s-8 8 0 8 8 8 0 8 8 8 0 8"/><path d="M40 20c6 4 6 8 0 12"/><path d="M46 16c8 6 8 14 0 20"/></svg>'
+    },
+    {
+      name: "Gregor Mendel",
+      idea: "Genetics, the laws of heredity",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="14" width="36" height="36"/><line x1="32" y1="14" x2="32" y2="50"/><line x1="14" y1="32" x2="50" y2="32"/></svg>'
+    },
+    {
+      name: "Carl Linnaeus",
+      idea: "Taxonomy, classifying life",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="10" r="3" fill="currentColor" stroke="none"/><line x1="32" y1="13" x2="32" y2="24"/><line x1="32" y1="24" x2="16" y2="36"/><line x1="32" y1="24" x2="48" y2="36"/><circle cx="16" cy="40" r="3" fill="currentColor" stroke="none"/><circle cx="48" cy="40" r="3" fill="currentColor" stroke="none"/><line x1="16" y1="40" x2="8" y2="52"/><line x1="16" y1="40" x2="24" y2="52"/><line x1="48" y1="40" x2="40" y2="52"/><line x1="48" y1="40" x2="56" y2="52"/></svg>'
+    },
+    {
+      name: "Johannes Kepler",
+      idea: "The laws of planetary motion",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="32" rx="26" ry="14"/><circle cx="20" cy="32" r="2.5" fill="currentColor" stroke="none"/><circle cx="44" cy="32" r="2.5" fill="currentColor" stroke="none"/><circle cx="55" cy="32" r="3" fill="currentColor" stroke="none"/></svg>'
     }
   ];
 
