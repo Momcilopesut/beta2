@@ -1,5 +1,6 @@
 :root {
   --bg: #ffffff;
+  --card-bg: #f6f6f6;
   --fg: #111111;
   --muted: #6b6b6b;
   --line: #dddddd;
@@ -9,6 +10,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #111111;
+    --card-bg: #1a1a1a;
     --fg: #f2f2f2;
     --muted: #999999;
     --line: #333333;
@@ -29,7 +31,9 @@ body {
   color: var(--fg);
   padding: 16px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
 }
 
 .art-wallpaper {
@@ -47,10 +51,26 @@ body {
   z-index: 1;
   max-width: 480px;
   width: 100%;
-  background: var(--bg);
+  background: var(--card-bg);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 32px 20px 40px;
+}
+
+.helix {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 200px;
+  color: var(--muted);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.helix svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .app-header {

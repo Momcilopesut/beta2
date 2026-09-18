@@ -581,7 +581,7 @@
   // data URI so it tiles cheaply at any screen size.
   function buildWallpaperTile() {
     var cols = 5, rows = 5, cellSize = 170, tile = cols * cellSize;
-    var iconSize = 120;
+    var iconSize = 72;
     var scale = iconSize / 64;
     var color = "#7a7a7a";
     var cellCount = cols * rows;
@@ -593,8 +593,8 @@
       var row = Math.floor(i / cols);
       var cx = col * cellSize + cellSize / 2;
       var cy = row * cellSize + cellSize / 2;
-      var jitterX = ((i * 17) % 25) - 12;
-      var jitterY = ((i * 29) % 25) - 12;
+      var jitterX = ((i * 17) % 19) - 9;
+      var jitterY = ((i * 29) % 19) - 9;
       var rot = ((i * 37) % 29) - 14;
       // Rotate around the icon's own center (32,32) before scaling and
       // placing it, so the shape stays rigid instead of swinging around
