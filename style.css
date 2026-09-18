@@ -31,9 +31,7 @@ body {
   color: var(--fg);
   padding: 16px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 28px;
+  justify-content: center;
 }
 
 .art-wallpaper {
@@ -57,25 +55,9 @@ body {
   padding: 32px 20px 40px;
 }
 
-.helix {
-  position: relative;
-  z-index: 1;
-  width: 64px;
-  height: 200px;
-  color: var(--muted);
-  flex-shrink: 0;
-  pointer-events: none;
-}
-
-.helix svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
 .app-header {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 24px;
 }
@@ -85,6 +67,26 @@ body {
   font-weight: 600;
   letter-spacing: 0.02em;
   margin: 0;
+}
+
+.header-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.helix-mark {
+  width: 18px;
+  height: 33px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.helix-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .streak {
