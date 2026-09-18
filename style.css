@@ -137,7 +137,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 20px;
   margin-bottom: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
 }
 
 .add-form-row {
@@ -227,9 +230,7 @@ body {
 }
 
 .time-block {
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
 }
 
 .time-block-header {
