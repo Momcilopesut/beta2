@@ -613,19 +613,55 @@
     return Math.floor((d - start) / 86400000);
   }
 
-  // Rotates the featured figure and quote once per day, deterministically.
+  // Rotates the quote once per day, deterministically.
   function renderInspiration() {
     var day = dayOfYear(new Date());
-    var figure = FIGURES[day % FIGURES.length];
     var quote = QUOTES[day % QUOTES.length];
-
-    document.getElementById("figure-art").innerHTML = figure.svg;
-    document.getElementById("figure-caption").innerHTML = "<strong>" + figure.name + "</strong> — " + figure.idea;
     document.getElementById("quote-text").textContent = "“" + quote.text + "”";
     document.getElementById("quote-author").textContent = "— " + quote.author;
   }
 
+  // Builds one repeating tile scattering every figure's icon across a
+  // grid with slight jitter and rotation, as a single background-image
+  // data URI so it tiles cheaply at any screen size.
+  function buildWallpaperTile() {
+    var cols = 6, rows = 6, cellSize = 150, tile = cols * cellSize;
+    var iconSize = 84;
+    var color = "#8a8a8a";
+    var cellCount = cols * rows;
+    var parts = [];
+
+    for (var i = 0; i < cellCount; i++) {
+      var figure = FIGURES[i % FIGURES.length];
+      var col = i % cols;
+      var row = Math.floor(i / cols);
+      var cx = col * cellSize + cellSize / 2;
+      var cy = row * cellSize + cellSize / 2;
+      var jitterX = ((i * 17) % 21) - 10;
+      var jitterY = ((i * 29) % 21) - 10;
+      var rot = ((i * 37) % 25) - 12;
+      var x = cx - iconSize / 2 + jitterX;
+      var y = cy - iconSize / 2 + jitterY;
+
+      var svg = figure.svg
+        .replace(/currentColor/g, color)
+        .replace("<svg ", '<svg x="' + x + '" y="' + y + '" width="' + iconSize + '" height="' + iconSize +
+          '" transform="rotate(' + rot + " " + cx + " " + cy + ')" ');
+      parts.push(svg);
+    }
+
+    var full = '<svg xmlns="http://www.w3.org/2000/svg" width="' + tile + '" height="' + tile +
+      '" viewBox="0 0 ' + tile + " " + tile + '">' + parts.join("") + "</svg>";
+    return "data:image/svg+xml," + encodeURIComponent(full);
+  }
+
+  function setupWallpaper() {
+    var el = document.getElementById("art-wallpaper");
+    el.style.backgroundImage = "url('" + buildWallpaperTile() + "')";
+  }
+
   var timeGrid = setupTimeGrid();
+  setupWallpaper();
   setupTabs();
   setupPlanForm(setupCategoryPicker());
   watchForDateChange();
