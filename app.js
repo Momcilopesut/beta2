@@ -129,6 +129,15 @@
     save(data);
   }
 
+  function updateTask(key, id, text, times, category) {
+    var task = getTasks(key).find(function (t) { return t.id === id; });
+    if (!task) return;
+    task.text = text;
+    task.times = times && times.length ? times.slice().sort(function (a, b) { return timeToMinutes(a) - timeToMinutes(b); }) : null;
+    task.category = category || null;
+    save(data);
+  }
+
   function toggleTask(key, id) {
     var tasks = getTasks(key);
     var task = tasks.find(function (t) { return t.id === id; });
@@ -182,7 +191,7 @@
   // plain downloadable app has no server, so this is a no-op here.
   function recordFeedback(key, task) {}
 
-  function renderList(listEl, emptyEl, key, showCheckbox) {
+  function renderList(listEl, emptyEl, key, showCheckbox, allowEdit) {
     var tasks = sortedTasks(key);
     listEl.innerHTML = "";
     emptyEl.style.display = tasks.length === 0 ? "block" : "none";
@@ -221,6 +230,16 @@
       span.className = "task-text";
       span.textContent = task.text;
       row.appendChild(span);
+
+      if (allowEdit) {
+        var edit = document.createElement("button");
+        edit.className = "task-edit";
+        edit.textContent = "edit";
+        edit.addEventListener("click", function () {
+          startEdit(task);
+        });
+        row.appendChild(edit);
+      }
 
       var del = document.createElement("button");
       del.className = "task-delete";
@@ -265,8 +284,8 @@
     document.getElementById("today-progress").textContent =
       todayTasks.length === 0 ? "" : doneCount + " of " + todayTasks.length + " done";
 
-    renderList(document.getElementById("today-list"), document.getElementById("today-empty"), tKey, true);
-    renderList(document.getElementById("plan-list"), document.getElementById("plan-empty"), pKey, false);
+    renderList(document.getElementById("today-list"), document.getElementById("today-empty"), tKey, true, false);
+    renderList(document.getElementById("plan-list"), document.getElementById("plan-empty"), pKey, false, true);
 
     var streak = computeStreak();
     document.getElementById("streak").textContent = streak > 0 ? streak + " day streak" : "";
@@ -293,9 +312,10 @@
     return slots;
   }
 
-  function takenSlots() {
+  function takenSlots(excludeId) {
     var taken = {};
     getTasks(tomorrowKey()).forEach(function (task) {
+      if (task.id === excludeId) return;
       (task.times || []).forEach(function (t) { taken[t] = true; });
     });
     return taken;
@@ -306,6 +326,7 @@
     var summary = document.getElementById("time-summary");
     var selected = {};
     var lastKey = tomorrowKey();
+    var excludeId = null;
 
     function updateSummary() {
       var times = Object.keys(selected);
@@ -313,14 +334,15 @@
     }
 
     // Rebuilds the grid from scratch, leaving out any slot a task for
-    // tomorrow already occupies.
+    // tomorrow already occupies (except the task currently being edited).
     function renderGrid() {
       var currentKey = tomorrowKey();
       if (currentKey !== lastKey) {
         lastKey = currentKey;
         selected = {};
+        excludeId = null;
       }
-      var taken = takenSlots();
+      var taken = takenSlots(excludeId);
       grid.innerHTML = "";
       allSlots().forEach(function (slot) {
         if (taken[slot]) {
@@ -356,6 +378,7 @@
 
     function reset() {
       selected = {};
+      excludeId = null;
       renderGrid();
       updateSummary();
     }
@@ -367,6 +390,15 @@
       getSelected: function () { return Object.keys(selected); },
       reset: reset,
       refresh: function () {
+        renderGrid();
+        updateSummary();
+      },
+      // Loads an existing task's slots for editing: excludes its own
+      // slots from "taken" and pre-checks them.
+      loadForEdit: function (id, times) {
+        excludeId = id;
+        selected = {};
+        (times || []).forEach(function (t) { selected[t] = true; });
         renderGrid();
         updateSummary();
       }
@@ -426,22 +458,61 @@
         categorySelect.value = "";
         suggestionSelect.hidden = true;
         suggestionSelect.innerHTML = "";
+      },
+      // Loads an existing task's category and text for editing.
+      loadForEdit: function (task) {
+        categorySelect.value = task.category || "";
+        populate();
+        textInput.value = task.text;
+        if (!suggestionSelect.hidden) {
+          var isSuggested = Array.prototype.some.call(suggestionSelect.options, function (o) {
+            return o.value === task.text;
+          });
+          suggestionSelect.value = isSuggested ? task.text : OTHER_VALUE;
+        }
       }
     };
   }
 
-  function setupPlanForm(categoryPicker) {
+  var editingTaskId = null;
+  var categoryPicker;
+
+  function startEdit(task) {
+    editingTaskId = task.id;
+    categoryPicker.loadForEdit(task);
+    timeGrid.loadForEdit(task.id, task.times);
+    document.getElementById("plan-form-submit").textContent = "Save";
+    document.getElementById("plan-cancel-edit").hidden = false;
+    document.getElementById("plan-input").focus();
+  }
+
+  function cancelEdit() {
+    editingTaskId = null;
+    document.getElementById("plan-input").value = "";
+    categoryPicker.reset();
+    timeGrid.reset();
+    document.getElementById("plan-form-submit").textContent = "Add";
+    document.getElementById("plan-cancel-edit").hidden = true;
+  }
+
+  function setupPlanForm(picker) {
+    categoryPicker = picker;
     var form = document.getElementById("plan-form");
     var input = document.getElementById("plan-input");
     var categoryInput = document.getElementById("plan-category");
+
+    document.getElementById("plan-cancel-edit").addEventListener("click", cancelEdit);
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var text = input.value.trim();
       if (!text) return;
-      addTask(tomorrowKey(), text, timeGrid.getSelected(), categoryInput.value);
-      input.value = "";
-      categoryPicker.reset();
-      timeGrid.reset();
+      if (editingTaskId) {
+        updateTask(tomorrowKey(), editingTaskId, text, timeGrid.getSelected(), categoryInput.value);
+      } else {
+        addTask(tomorrowKey(), text, timeGrid.getSelected(), categoryInput.value);
+      }
+      cancelEdit();
       render();
     });
   }

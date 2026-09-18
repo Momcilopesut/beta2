@@ -194,6 +194,12 @@ body {
   cursor: pointer;
 }
 
+#plan-cancel-edit {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--line);
+}
+
 .task-list {
   list-style: none;
   margin: 0;
@@ -328,13 +334,18 @@ body {
   text-decoration: line-through;
 }
 
-.task-delete {
+.task-delete,
+.task-edit {
   background: none;
   border: none;
   color: var(--muted);
   font-size: 13px;
   cursor: pointer;
   padding: 4px 6px;
+}
+
+.task-edit:hover {
+  color: var(--fg);
 }
 
 .task-delete:hover {
