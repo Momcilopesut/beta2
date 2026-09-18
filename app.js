@@ -421,172 +421,127 @@
     {
       name: "Leonardo da Vinci",
       idea: "Vitruvian Man, the proportions of the human body",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="24"/><rect x="10" y="10" width="44" height="44"/><line x1="32" y1="8" x2="32" y2="56"/><line x1="8" y1="32" x2="56" y2="32"/></svg>'
-    },
-    {
-      name: "Isaac Newton",
-      idea: "Universal gravitation",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="26" cy="22" r="12"/><line x1="27" y1="10" x2="30" y2="4"/><path d="M8 46c8-10 40-10 48 0"/></svg>'
-    },
-    {
-      name: "Marie Curie",
-      idea: "Radioactivity",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="3" fill="currentColor" stroke="none"/><ellipse cx="32" cy="32" rx="26" ry="10"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(120 32 32)"/></svg>'
-    },
-    {
-      name: "Nikola Tesla",
-      idea: "Alternating current",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M6 32c6-16 12-16 18 0s12 16 18 0 12-16 16 0"/></svg>'
-    },
-    {
-      name: "Ada Lovelace",
-      idea: "The first published algorithm",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 24h16a10 10 0 0 1 0 20H24"/><path d="M30 38l-8 6 8 6"/></svg>'
-    },
-    {
-      name: "Buckminster Fuller",
-      idea: "The geodesic dome",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 48a24 24 0 0 1 48 0"/><line x1="8" y1="48" x2="56" y2="48"/><line x1="20" y1="48" x2="32" y2="24"/><line x1="44" y1="48" x2="32" y2="24"/><line x1="14" y1="48" x2="32" y2="30"/><line x1="50" y1="48" x2="32" y2="30"/></svg>'
-    },
-    {
-      name: "Frank Lloyd Wright",
-      idea: "Organic architecture",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="22" x2="50" y2="22"/><line x1="14" y1="32" x2="58" y2="32"/><line x1="6" y1="42" x2="50" y2="42"/><line x1="20" y1="14" x2="20" y2="50"/></svg>'
-    },
-    {
-      name: "Zaha Hadid",
-      idea: "Fluid, curving architecture",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 50c0-16 30-4 30-20s10-12 10-18"/></svg>'
-    },
-    {
-      name: "Antoni Gaudi",
-      idea: "The Sagrada Familia",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 52V26l6-16 6 16v26"/><path d="M38 52V32l5-12 5 12v20"/><line x1="12" y1="52" x2="52" y2="52"/></svg>'
-    },
-    {
-      name: "Imhotep",
-      idea: "The step pyramid",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="42" width="48" height="8"/><rect x="14" y="34" width="36" height="8"/><rect x="20" y="26" width="24" height="8"/><rect x="26" y="18" width="12" height="8"/></svg>'
-    },
-    {
-      name: "Euclid",
-      idea: "Geometry, in The Elements",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 8l-14 16M32 8l14 16"/><path d="M12 52h40l-20-28z"/></svg>'
-    },
-    {
-      name: "Archimedes",
-      idea: "The lever and buoyancy",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="8" y1="28" x2="56" y2="40"/><path d="M32 34l-4 8h8z"/><circle cx="12" cy="24" r="4"/><circle cx="52" cy="44" r="6"/></svg>'
-    },
-    {
-      name: "Charles Darwin",
-      idea: "Evolution by natural selection",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 56V32M32 32L18 16M32 32l14-16M32 40L14 28M32 40l18-12"/></svg>'
-    },
-    {
-      name: "Alan Turing",
-      idea: "The Turing machine",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="30" width="48" height="12"/><line x1="20" y1="30" x2="20" y2="42"/><line x1="32" y1="30" x2="32" y2="42"/><line x1="44" y1="30" x2="44" y2="42"/><path d="M32 30v-8"/><rect x="26" y="14" width="12" height="8"/></svg>'
-    },
-    {
-      name: "Pythagoras",
-      idea: "The Pythagorean theorem",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 12L12 52L52 52Z"/><rect x="3" y="12" width="8" height="40"/><rect x="12" y="53" width="40" height="8"/></svg>'
-    },
-    {
-      name: "Galileo Galilei",
-      idea: "Heliocentrism",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="6" fill="currentColor" stroke="none"/><ellipse cx="32" cy="32" rx="26" ry="12"/><circle cx="58" cy="32" r="3" fill="currentColor" stroke="none"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="24"/><rect x="10" y="10" width="44" height="44"/><line x1="32" y1="8" x2="32" y2="56"/><line x1="8" y1="32" x2="56" y2="32"/><line x1="14" y1="14" x2="50" y2="50" stroke-width="1.3"/><line x1="50" y1="14" x2="14" y2="50" stroke-width="1.3"/><circle cx="32" cy="32" r="2" fill="currentColor" stroke="none"/></svg>'
     },
     {
       name: "Michelangelo",
       idea: "The Sistine Chapel ceiling",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 20c10 4 16 10 20 16"/><path d="M56 44c-10-4-16-10-20-16"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 16a34 20 0 0 1 56 0" stroke-width="1.3"/><path d="M8 20c10 4 16 10 20 16"/><path d="M56 44c-10-4-16-10-20-16"/><line x1="31" y1="31" x2="34" y2="28" stroke-width="1.3"/></svg>'
     },
     {
       name: "Vincent van Gogh",
       idea: "The Starry Night",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M40 24c6 2 8 8 4 12s-12 2-12-4 8-10 14-6-2 16-10 14-12-10-6-18"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M38 20c6 2 8 8 4 12s-12 2-12-4 8-10 14-6-2 16-10 14-12-10-6-18"/><path d="M14 6a7 7 0 1 0 0 14A5.5 5.5 0 1 1 14 6Z" stroke-width="1.3"/><circle cx="52" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="58" cy="18" r="1" fill="currentColor" stroke="none"/><line x1="4" y1="52" x2="60" y2="52" stroke-width="1.3"/><path d="M12 52V32c3 0 3 6 0 10s3 6 0 10" stroke-width="1.3"/></svg>'
     },
     {
       name: "Pablo Picasso",
       idea: "Cubism",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M16 44V20l16-8 16 8v24l-16 8z"/><line x1="16" y1="20" x2="32" y2="32"/><line x1="48" y1="20" x2="32" y2="32"/><line x1="32" y1="32" x2="32" y2="52"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M16 44V20l16-8 16 8v24l-16 8z"/><line x1="16" y1="20" x2="32" y2="32"/><line x1="48" y1="20" x2="32" y2="32"/><line x1="32" y1="32" x2="32" y2="52"/><line x1="20" y1="26" x2="26" y2="30" stroke-width="1.3"/><line x1="44" y1="26" x2="38" y2="30" stroke-width="1.3"/><line x1="16" y1="44" x2="32" y2="52" stroke-width="1.3"/></svg>'
     },
     {
       name: "Claude Monet",
       idea: "Water Lilies, and Impressionism",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="36" rx="12" ry="6"/><path d="M10 46c8 4 36 4 44 0"/><path d="M14 52c8 3 28 3 36 0"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><ellipse cx="24" cy="30" rx="10" ry="5"/><ellipse cx="42" cy="38" rx="9" ry="4.5"/><circle cx="24" cy="30" r="1.4" fill="currentColor" stroke="none"/><circle cx="42" cy="38" r="1.4" fill="currentColor" stroke="none"/><path d="M6 46c8 4 40 4 52 0" stroke-width="1.3"/><path d="M10 52c8 3 32 3 40 0" stroke-width="1.3"/></svg>'
     },
     {
       name: "M.C. Escher",
       idea: "Impossible constructions and tessellation",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 8l20 34H12z"/><path d="M32 24l12 20H20z"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 6l22 38H10z"/><path d="M32 22l14 24H18z"/><path d="M32 38l6 10H26z"/><line x1="18" y1="44" x2="46" y2="44" stroke-width="1.2"/></svg>'
     },
     {
       name: "Katsushika Hokusai",
       idea: "The Great Wave",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M6 44c10-2 14-10 10-16-3-4-9-3-9 2 0 6 8 8 14 4"/><path d="M6 50c14 4 34 4 48-2"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 42c10-2 14-10 10-16-3-4-9-3-9 2 0 6 8 8 14 4"/><circle cx="8" cy="30" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="26" r="1" fill="currentColor" stroke="none"/><path d="M40 50l6-3 6 3" stroke-width="1.3"/><path d="M4 50c14 4 34 4 48-2"/></svg>'
+    },
+    {
+      name: "Buckminster Fuller",
+      idea: "The geodesic dome",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M6 48a26 22 0 0 1 52 0"/><line x1="6" y1="48" x2="58" y2="48"/><line x1="16" y1="48" x2="32" y2="26"/><line x1="48" y1="48" x2="32" y2="26"/><line x1="24" y1="48" x2="32" y2="33"/><line x1="40" y1="48" x2="32" y2="33"/><line x1="12" y1="48" x2="26" y2="34" stroke-width="1.3"/><line x1="52" y1="48" x2="38" y2="34" stroke-width="1.3"/></svg>'
+    },
+    {
+      name: "Frank Lloyd Wright",
+      idea: "Organic architecture",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><line x1="4" y1="20" x2="48" y2="20"/><line x1="12" y1="30" x2="58" y2="30"/><line x1="4" y1="40" x2="48" y2="40"/><line x1="18" y1="12" x2="18" y2="46"/><path d="M30 44c1 4-1 6 0 10" stroke-width="1.3"/><path d="M36 44c1 4-1 6 0 10" stroke-width="1.3"/></svg>'
+    },
+    {
+      name: "Antoni Gaudi",
+      idea: "The Sagrada Familia",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18 52V32l4-12 4 12v20"/><path d="M32 52V24l6-16 6 16v28"/><path d="M48 52V34l4-10 4 10v18"/><line x1="8" y1="52" x2="58" y2="52"/><circle cx="38" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      name: "Imhotep",
+      idea: "The step pyramid",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="46" width="52" height="7"/><rect x="12" y="39" width="40" height="7"/><rect x="18" y="32" width="28" height="7"/><rect x="24" y="25" width="16" height="7"/><rect x="28" y="18" width="8" height="7"/><rect x="29" y="46" width="6" height="7" stroke-width="1.3"/></svg>'
     },
     {
       name: "I.M. Pei",
       idea: "The Louvre Pyramid",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 12L8 50h48z"/><line x1="32" y1="12" x2="32" y2="50"/><line x1="20" y1="50" x2="32" y2="27"/><line x1="44" y1="50" x2="32" y2="27"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 10L6 50h52z"/><line x1="32" y1="10" x2="32" y2="50"/><line x1="18" y1="50" x2="32" y2="25"/><line x1="46" y1="50" x2="32" y2="25"/><path d="M8 50l4-6 4 6z" stroke-width="1.3"/><path d="M48 50l4-6 4 6z" stroke-width="1.3"/></svg>'
     },
     {
       name: "Le Corbusier",
       idea: "Villa Savoye, architecture on stilts",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="20" width="44" height="16"/><line x1="16" y1="36" x2="16" y2="52"/><line x1="32" y1="36" x2="32" y2="52"/><line x1="48" y1="36" x2="48" y2="52"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="18" width="48" height="18"/><line x1="8" y1="27" x2="56" y2="27" stroke-width="1.3"/><line x1="14" y1="36" x2="14" y2="54"/><line x1="32" y1="36" x2="32" y2="54"/><line x1="50" y1="36" x2="50" y2="54"/><line x1="4" y1="54" x2="60" y2="54" stroke-width="1.3"/></svg>'
     },
     {
       name: "Eero Saarinen",
       idea: "The Gateway Arch",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 52C12 24 22 10 32 10s20 14 20 42"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 54C12 26 22 12 32 12s20 14 20 42"/><line x1="4" y1="54" x2="60" y2="54"/><line x1="46" y1="54" x2="46" y2="46" stroke-width="1.3"/><line x1="52" y1="54" x2="52" y2="42" stroke-width="1.3"/></svg>'
     },
     {
-      name: "Christopher Wren",
-      idea: "St. Paul's Cathedral dome",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 44a20 16 0 0 1 40 0"/><line x1="8" y1="44" x2="56" y2="44"/><line x1="32" y1="12" x2="32" y2="20"/><line x1="28" y1="14" x2="36" y2="14"/></svg>'
+      name: "Isaac Newton",
+      idea: "Universal gravitation",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="8" y1="6" x2="30" y2="10" stroke-width="1.3"/><circle cx="26" cy="22" r="12"/><line x1="27" y1="10" x2="29" y2="5"/><path d="M8 46c8-10 40-10 48 0"/><circle cx="14" cy="44" r="1" fill="currentColor" stroke="none"/><circle cx="50" cy="44" r="1" fill="currentColor" stroke="none"/></svg>'
     },
     {
-      name: "Louis Sullivan",
-      idea: "“Form follows function,” the early skyscraper",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="18" y="8" width="28" height="44"/><line x1="18" y1="18" x2="46" y2="18"/><line x1="18" y1="28" x2="46" y2="28"/><line x1="18" y1="38" x2="46" y2="38"/><line x1="32" y1="52" x2="32" y2="58"/></svg>'
+      name: "Marie Curie",
+      idea: "Radioactivity",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="3" fill="currentColor" stroke="none"/><ellipse cx="32" cy="32" rx="26" ry="10"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(120 32 32)"/><line x1="32" y1="4" x2="32" y2="9" stroke-width="1.3"/><line x1="32" y1="55" x2="32" y2="60" stroke-width="1.3"/><line x1="4" y1="32" x2="9" y2="32" stroke-width="1.3"/></svg>'
+    },
+    {
+      name: "Nikola Tesla",
+      idea: "Alternating current",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 28c6-16 12-16 18 0s12 16 18 0 12-16 16 0"/><path d="M4 40c6-12 12-12 18 0s12 12 18 0 12-12 16 0" stroke-width="1.3"/><circle cx="4" cy="28" r="1.5" fill="currentColor" stroke="none"/><circle cx="60" cy="28" r="1.5" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      name: "Charles Darwin",
+      idea: "Evolution by natural selection",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 58V36M32 36L16 18M32 36l16-18M32 44L12 30M32 44l20-14M24 27L18 20M40 27l6-7"/><circle cx="16" cy="18" r="1.3" fill="currentColor" stroke="none"/><circle cx="48" cy="18" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="30" r="1.3" fill="currentColor" stroke="none"/><circle cx="52" cy="30" r="1.3" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      name: "Alan Turing",
+      idea: "The Turing machine",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="32" width="56" height="12"/><line x1="14" y1="32" x2="14" y2="44"/><line x1="24" y1="32" x2="24" y2="44"/><line x1="34" y1="32" x2="34" y2="44"/><line x1="44" y1="32" x2="44" y2="44"/><line x1="54" y1="32" x2="54" y2="44"/><circle cx="19" cy="38" r="1" fill="currentColor" stroke="none"/><circle cx="39" cy="38" r="1" fill="currentColor" stroke="none"/><path d="M34 32v-8" stroke-width="1.3"/><rect x="28" y="16" width="12" height="8" stroke-width="1.3"/></svg>'
+    },
+    {
+      name: "Pythagoras",
+      idea: "The Pythagorean theorem",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 12L12 52L52 52Z"/><rect x="3" y="12" width="9" height="40"/><rect x="12" y="53" width="40" height="9"/><polygon points="12,12 26.1,26.1 40.3,12 26.1,-2.1" stroke-width="1.3"/></svg>'
+    },
+    {
+      name: "Galileo Galilei",
+      idea: "Heliocentrism",
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="6" fill="currentColor" stroke="none"/><ellipse cx="32" cy="32" rx="18" ry="9"/><ellipse cx="32" cy="32" rx="27" ry="13" stroke-width="1.3"/><circle cx="49" cy="32" r="2" fill="currentColor" stroke="none"/><circle cx="14" cy="32" r="1.5" fill="currentColor" stroke="none"/></svg>'
     },
     {
       name: "Albert Einstein",
       idea: "The theory of relativity",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M6 20c12 4 18 4 26 0s16-4 26 0"/><path d="M6 32c12 6 18 6 26 0s16-6 26 0"/><path d="M6 44c12 4 18 4 26 0s16-4 26 0"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M4 18c12 4 18 4 26 0s16-4 26 0"/><path d="M4 26c12 5 18 5 26 0s16-5 26 0" stroke-width="1.3"/><path d="M4 32c12 6 18 6 26 0s16-6 26 0"/><path d="M4 38c12 5 18 5 26 0s16-5 26 0" stroke-width="1.3"/><path d="M4 46c12 4 18 4 26 0s16-4 26 0"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/></svg>'
     },
     {
       name: "Rosalind Franklin",
       idea: "The structure of DNA",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M20 6c-8 8-8 16 0 24s8 16 0 24"/><path d="M44 6c8 8 8 16 0 24s-8 16 0 24"/><line x1="20" y1="14" x2="44" y2="14"/><line x1="18" y1="30" x2="46" y2="30"/><line x1="20" y1="46" x2="44" y2="46"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M20 4c-8 8-8 16 0 24s8 16 0 24"/><path d="M44 4c8 8 8 16 0 24s-8 16 0 24"/><line x1="20" y1="10" x2="44" y2="10"/><line x1="18" y1="18" x2="46" y2="18" stroke-width="1.3"/><line x1="20" y1="28" x2="44" y2="28"/><line x1="18" y1="38" x2="46" y2="38" stroke-width="1.3"/><line x1="20" y1="46" x2="44" y2="46"/></svg>'
     },
     {
       name: "Louis Pasteur",
       idea: "Germ theory",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M26 8h12v14l12 24a4 4 0 0 1-4 6H18a4 4 0 0 1-4-6l12-24z"/><line x1="24" y1="8" x2="40" y2="8"/><line x1="20" y1="38" x2="44" y2="38"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M26 8h12v14l12 24a4 4 0 0 1-4 6H18a4 4 0 0 1-4-6l12-24z"/><line x1="24" y1="8" x2="40" y2="8"/><rect x="27" y="3" width="10" height="5" stroke-width="1.3"/><line x1="20" y1="40" x2="44" y2="40"/><circle cx="28" cy="46" r="1.3" fill="currentColor" stroke="none"/><circle cx="36" cy="49" r="1" fill="currentColor" stroke="none"/></svg>'
     },
     {
       name: "Michael Faraday",
       idea: "Electromagnetic induction",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 12v40"/><path d="M20 12c8 0 8 8 0 8s-8 8 0 8 8 8 0 8 8 8 0 8"/><path d="M40 20c6 4 6 8 0 12"/><path d="M46 16c8 6 8 14 0 20"/></svg>'
-    },
-    {
-      name: "Gregor Mendel",
-      idea: "Genetics, the laws of heredity",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="14" width="36" height="36"/><line x1="32" y1="14" x2="32" y2="50"/><line x1="14" y1="32" x2="50" y2="32"/></svg>'
-    },
-    {
-      name: "Carl Linnaeus",
-      idea: "Taxonomy, classifying life",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="10" r="3" fill="currentColor" stroke="none"/><line x1="32" y1="13" x2="32" y2="24"/><line x1="32" y1="24" x2="16" y2="36"/><line x1="32" y1="24" x2="48" y2="36"/><circle cx="16" cy="40" r="3" fill="currentColor" stroke="none"/><circle cx="48" cy="40" r="3" fill="currentColor" stroke="none"/><line x1="16" y1="40" x2="8" y2="52"/><line x1="16" y1="40" x2="24" y2="52"/><line x1="48" y1="40" x2="40" y2="52"/><line x1="48" y1="40" x2="56" y2="52"/></svg>'
-    },
-    {
-      name: "Johannes Kepler",
-      idea: "The laws of planetary motion",
-      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="32" rx="26" ry="14"/><circle cx="20" cy="32" r="2.5" fill="currentColor" stroke="none"/><circle cx="44" cy="32" r="2.5" fill="currentColor" stroke="none"/><circle cx="55" cy="32" r="3" fill="currentColor" stroke="none"/></svg>'
+      svg: '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M18 8v48"/><path d="M18 8c7 0 7 7 0 7s-7 7 0 7 7 7 0 7 7 7 0 7 7 7 0 7"/><path d="M38 18c5 3 5 6 0 9" stroke-width="1.3"/><path d="M43 14c8 5 8 12 0 17"/><path d="M48 10c11 7 11 16 0 23" stroke-width="1.3"/></svg>'
     }
   ];
 
@@ -625,9 +580,10 @@
   // grid with slight jitter and rotation, as a single background-image
   // data URI so it tiles cheaply at any screen size.
   function buildWallpaperTile() {
-    var cols = 6, rows = 6, cellSize = 150, tile = cols * cellSize;
-    var iconSize = 84;
-    var color = "#8a8a8a";
+    var cols = 5, rows = 5, cellSize = 170, tile = cols * cellSize;
+    var iconSize = 120;
+    var scale = iconSize / 64;
+    var color = "#7a7a7a";
     var cellCount = cols * rows;
     var parts = [];
 
@@ -637,17 +593,24 @@
       var row = Math.floor(i / cols);
       var cx = col * cellSize + cellSize / 2;
       var cy = row * cellSize + cellSize / 2;
-      var jitterX = ((i * 17) % 21) - 10;
-      var jitterY = ((i * 29) % 21) - 10;
-      var rot = ((i * 37) % 25) - 12;
-      var x = cx - iconSize / 2 + jitterX;
-      var y = cy - iconSize / 2 + jitterY;
+      var jitterX = ((i * 17) % 25) - 12;
+      var jitterY = ((i * 29) % 25) - 12;
+      var rot = ((i * 37) % 29) - 14;
+      // Rotate around the icon's own center (32,32) before scaling and
+      // placing it, so the shape stays rigid instead of swinging around
+      // an off-center pivot.
+      var tx = cx + jitterX - 32 * scale;
+      var ty = cy + jitterY - 32 * scale;
 
-      var svg = figure.svg
+      var inner = figure.svg
         .replace(/currentColor/g, color)
-        .replace("<svg ", '<svg x="' + x + '" y="' + y + '" width="' + iconSize + '" height="' + iconSize +
-          '" transform="rotate(' + rot + " " + cx + " " + cy + ')" ');
-      parts.push(svg);
+        .replace(/^<svg[^>]*>/, "")
+        .replace(/<\/svg>$/, "");
+
+      var g = '<g transform="translate(' + tx + " " + ty + ") scale(" + scale + ") rotate(" + rot + ' 32 32)" ' +
+        'fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        inner + "</g>";
+      parts.push(g);
     }
 
     var full = '<svg xmlns="http://www.w3.org/2000/svg" width="' + tile + '" height="' + tile +
