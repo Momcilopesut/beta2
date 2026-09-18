@@ -345,9 +345,9 @@ body {
 }
 
 .time-slot.selected {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
+  background: #cfcfcf;
+  color: #111111;
+  border-color: #b8b8b8;
   animation: slot-pop 0.22s ease;
 }
 
