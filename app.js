@@ -226,10 +226,20 @@
         row.appendChild(categoryEl);
       }
 
-      var span = document.createElement("span");
-      span.className = "task-text";
-      span.textContent = task.text;
-      row.appendChild(span);
+      var icon = ACTIVITY_ICONS[task.text];
+      if (icon) {
+        var iconWrap = document.createElement("span");
+        iconWrap.className = "task-icon";
+        iconWrap.title = task.text;
+        iconWrap.setAttribute("aria-label", task.text);
+        iconWrap.innerHTML = icon;
+        row.appendChild(iconWrap);
+      } else {
+        var span = document.createElement("span");
+        span.className = "task-text";
+        span.textContent = task.text;
+        row.appendChild(span);
+      }
 
       if (allowEdit) {
         var edit = document.createElement("button");
@@ -327,6 +337,11 @@
     var selected = {};
     var lastKey = tomorrowKey();
     var excludeId = null;
+    // The most recently added slot, used as the start of a fill range
+    // when the next pick isn't adjacent to it; cleared on deselect so a
+    // fresh single click never fills anything.
+    var anchorSlot = null;
+    var buttons = {};
 
     function updateSummary() {
       var times = Object.keys(selected);
@@ -341,9 +356,11 @@
         lastKey = currentKey;
         selected = {};
         excludeId = null;
+        anchorSlot = null;
       }
       var taken = takenSlots(excludeId);
       grid.innerHTML = "";
+      buttons = {};
       allSlots().forEach(function (slot) {
         if (taken[slot]) {
           delete selected[slot];
@@ -355,19 +372,46 @@
         btn.dataset.time = slot;
         btn.textContent = formatTime(slot);
         grid.appendChild(btn);
+        buttons[slot] = btn;
       });
+    }
+
+    // Toggles one slot in place (not a full grid rebuild) so the CSS
+    // pop animation plays on the actual button the user is looking at.
+    function setSlotSelected(slot, isSelected) {
+      if (isSelected) {
+        selected[slot] = true;
+      } else {
+        delete selected[slot];
+      }
+      var btn = buttons[slot];
+      if (btn) btn.classList.toggle("selected", isSelected);
     }
 
     grid.addEventListener("click", function (e) {
       var btn = e.target.closest(".time-slot");
       if (!btn) return;
       var slot = btn.dataset.time;
+
       if (selected[slot]) {
-        delete selected[slot];
-        btn.classList.remove("selected");
+        setSlotSelected(slot, false);
+        anchorSlot = null;
       } else {
-        selected[slot] = true;
-        btn.classList.add("selected");
+        // Slots currently in the grid, in on-screen order, so a gap-fill
+        // only ever spans visible (available) slots.
+        var order = Object.keys(buttons);
+        var filled = false;
+        if (anchorSlot && buttons[anchorSlot]) {
+          var i1 = order.indexOf(anchorSlot);
+          var i2 = order.indexOf(slot);
+          if (i1 !== -1 && i2 !== -1) {
+            var lo = Math.min(i1, i2), hi = Math.max(i1, i2);
+            for (var i = lo; i <= hi; i++) setSlotSelected(order[i], true);
+            filled = true;
+          }
+        }
+        if (!filled) setSlotSelected(slot, true);
+        anchorSlot = slot;
       }
       updateSummary();
     });
@@ -379,6 +423,7 @@
     function reset() {
       selected = {};
       excludeId = null;
+      anchorSlot = null;
       renderGrid();
       updateSummary();
     }
@@ -398,6 +443,7 @@
       loadForEdit: function (id, times) {
         excludeId = id;
         selected = {};
+        anchorSlot = null;
         (times || []).forEach(function (t) { selected[t] = true; });
         renderGrid();
         updateSummary();
@@ -410,6 +456,29 @@
     Health: ["Workout", "Prep a healthy meal", "Stretch / mobility", "Get to bed on time"],
     Chores: ["Do laundry", "Grocery shopping", "Clean the house", "Wash the dishes"],
     Learning: ["Reading", "Practice a skill", "Watch a course lesson", "Journal / review notes"]
+  };
+
+  // Once a task is scheduled, a suggestion picked from the dropdown is
+  // shown as a small line-art icon (matching the background art's style)
+  // instead of its label. Freeform "Other" tasks have no matching icon,
+  // so they keep showing their typed text.
+  var ACTIVITY_ICONS = {
+    "Deep work block": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="14" width="36" height="24" rx="2"/><line x1="20" y1="20" x2="44" y2="20" stroke-width="2"/><line x1="20" y1="27" x2="38" y2="27" stroke-width="2"/><path d="M8 46h48l-4 8H12z"/></svg>',
+    "Respond to emails": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="16" width="48" height="32" rx="2"/><path d="M8 18l24 20 24-20"/></svg>',
+    "Team check-in": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="20" r="9"/><path d="M6 50c0-11 7-18 16-18s16 7 16 18"/><circle cx="46" cy="24" r="7" stroke-width="2.5"/><path d="M34 50c0-9 6-15 14-15" stroke-width="2.5"/></svg>',
+    "Plan tomorrow's priorities": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="10" width="36" height="46" rx="3"/><rect x="24" y="6" width="16" height="8" rx="2"/><path d="M21 26l4 4 8-8" stroke-width="2.6"/><line x1="38" y1="28" x2="46" y2="28" stroke-width="2.6"/><path d="M21 40l4 4 8-8" stroke-width="2.6"/><line x1="38" y1="42" x2="46" y2="42" stroke-width="2.6"/></svg>',
+    "Workout": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="16" y1="32" x2="48" y2="32"/><rect x="6" y="24" width="10" height="16" rx="2"/><rect x="48" y="24" width="10" height="16" rx="2"/><rect x="2" y="27" width="6" height="10" rx="1.5" stroke-width="2.4"/><rect x="56" y="27" width="6" height="10" rx="1.5" stroke-width="2.4"/></svg>',
+    "Prep a healthy meal": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 22c-10 0-16 8-16 18s8 18 16 18 16-9 16-18c0-10-6-18-16-18Z"/><path d="M32 22c0-6 4-10 4-10" stroke-width="2.4"/><path d="M32 12c4-4 10-2 10-2" stroke-width="2.4"/></svg>',
+    "Stretch / mobility": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="12" r="6"/><path d="M32 18v20"/><path d="M32 22L16 10"/><path d="M32 22L48 10"/><path d="M32 38L18 56"/><path d="M32 38L46 56"/></svg>',
+    "Get to bed on time": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M40 12a20 20 0 1 0 14 32 16 16 0 0 1-14-32Z"/><path d="M46 14h8l-8 8h8" stroke-width="2.4"/></svg>',
+    "Do laundry": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="8" width="44" height="48" rx="3"/><circle cx="32" cy="34" r="14"/><path d="M24 34c0-6 4-9 8-9s8 5 8 9" stroke-width="2.4"/><circle cx="16" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="24" cy="16" r="1.6" fill="currentColor" stroke="none"/></svg>',
+    "Grocery shopping": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M14 22h36l-4 34H18Z"/><path d="M22 22v-4a10 10 0 0 1 20 0v4" stroke-width="2.6"/></svg>',
+    "Clean the house": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="46" y1="10" x2="22" y2="34"/><path d="M22 34l-14 14 4 4 14-14"/><path d="M10 48l-4 6M16 50l-3 6M22 48l0 6" stroke-width="2"/></svg>',
+    "Wash the dishes": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="40" rx="18" ry="8"/><ellipse cx="26" cy="40" rx="9" ry="4" stroke-width="2.2"/><path d="M46 12c5 6 5 12 0 16-5-4-5-10 0-16Z"/></svg>',
+    "Reading": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M32 16c-6-4-16-4-22 0v34c6-4 16-4 22 0"/><path d="M32 16c6-4 16-4 22 0v34c-6-4-16-4-22 0"/><line x1="32" y1="16" x2="32" y2="50"/></svg>',
+    "Practice a skill": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="13" stroke-width="2.6"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/></svg>',
+    "Watch a course lesson": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="12" width="48" height="32" rx="3"/><path d="M27 22l14 8-14 8Z"/><line x1="24" y1="52" x2="40" y2="52" stroke-width="2.6"/></svg>',
+    "Journal / review notes": '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="12" y="8" width="32" height="48" rx="2"/><line x1="19" y1="20" x2="37" y2="20" stroke-width="2.2"/><line x1="19" y1="28" x2="37" y2="28" stroke-width="2.2"/><line x1="19" y1="36" x2="30" y2="36" stroke-width="2.2"/><path d="M44 46l10-10 4 4-10 10-5 1Z"/></svg>'
   };
   var OTHER_VALUE = "__other__";
 

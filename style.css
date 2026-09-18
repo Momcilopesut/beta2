@@ -260,6 +260,25 @@ body {
   word-break: break-word;
 }
 
+.task-icon {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.task-icon svg {
+  width: 26px;
+  height: 26px;
+  color: var(--fg);
+  flex-shrink: 0;
+  display: block;
+}
+
+.task-item.done .task-icon svg {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
 .task-time {
   font-size: 13px;
   color: var(--muted);
@@ -309,15 +328,27 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-size: 12px;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   font-variant-numeric: tabular-nums;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.time-slot:hover {
+  transform: scale(1.05);
+}
+
+@keyframes slot-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.18); }
+  100% { transform: scale(1); }
 }
 
 .time-slot.selected {
   background: var(--fg);
   color: var(--bg);
   border-color: var(--fg);
+  animation: slot-pop 0.22s ease;
 }
 
 .task-category {
