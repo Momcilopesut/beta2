@@ -164,6 +164,8 @@ body {
 }
 
 .add-form select {
+  flex: 1;
+  min-width: 120px;
   padding: 10px 12px;
   border: 1px solid var(--line);
   background: var(--bg);
