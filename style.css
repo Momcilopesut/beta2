@@ -202,10 +202,41 @@ body {
 
 .task-item {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-feedback {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.feedback-btn {
+  background: none;
+  border: none;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.feedback-btn:hover {
+  opacity: 0.7;
+}
+
+.feedback-btn.selected {
+  opacity: 1;
 }
 
 .task-item input[type="checkbox"] {

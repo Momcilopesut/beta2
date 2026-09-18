@@ -123,7 +123,8 @@
       text: text,
       times: times && times.length ? times.slice().sort(function (a, b) { return timeToMinutes(a) - timeToMinutes(b); }) : null,
       category: category || null,
-      done: false
+      done: false,
+      feedback: null
     });
     save(data);
   }
@@ -161,6 +162,26 @@
     return streak;
   }
 
+  var FEEDBACK_OPTIONS = [
+    { value: "up", label: "👍" },
+    { value: "down", label: "👎" },
+    { value: "smile", label: "🙂" }
+  ];
+
+  function setFeedback(key, id, value) {
+    var tasks = getTasks(key);
+    var task = tasks.find(function (t) { return t.id === id; });
+    if (!task) return;
+    task.feedback = task.feedback === value ? null : value;
+    save(data);
+    recordFeedback(key, task);
+    return task.feedback;
+  }
+
+  // Hook for the hosted version to log feedback to a database; the
+  // plain downloadable app has no server, so this is a no-op here.
+  function recordFeedback(key, task) {}
+
   function renderList(listEl, emptyEl, key, showCheckbox) {
     var tasks = sortedTasks(key);
     listEl.innerHTML = "";
@@ -170,6 +191,9 @@
       var li = document.createElement("li");
       li.className = "task-item" + (task.done ? " done" : "");
 
+      var row = document.createElement("div");
+      row.className = "task-row";
+
       if (showCheckbox) {
         var checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -178,25 +202,25 @@
           toggleTask(key, task.id);
           render();
         });
-        li.appendChild(checkbox);
+        row.appendChild(checkbox);
       }
 
       var timeEl = document.createElement("span");
       timeEl.className = "task-time";
       timeEl.textContent = formatTimes(task.times);
-      li.appendChild(timeEl);
+      row.appendChild(timeEl);
 
       if (task.category) {
         var categoryEl = document.createElement("span");
         categoryEl.className = "task-category";
         categoryEl.textContent = task.category;
-        li.appendChild(categoryEl);
+        row.appendChild(categoryEl);
       }
 
       var span = document.createElement("span");
       span.className = "task-text";
       span.textContent = task.text;
-      li.appendChild(span);
+      row.appendChild(span);
 
       var del = document.createElement("button");
       del.className = "task-delete";
@@ -205,7 +229,25 @@
         deleteTask(key, task.id);
         render();
       });
-      li.appendChild(del);
+      row.appendChild(del);
+
+      li.appendChild(row);
+
+      var feedback = document.createElement("div");
+      feedback.className = "task-feedback";
+      FEEDBACK_OPTIONS.forEach(function (opt) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "feedback-btn" + (task.feedback === opt.value ? " selected" : "");
+        btn.textContent = opt.label;
+        btn.setAttribute("aria-label", opt.value);
+        btn.addEventListener("click", function () {
+          setFeedback(key, task.id, opt.value);
+          render();
+        });
+        feedback.appendChild(btn);
+      });
+      li.appendChild(feedback);
 
       listEl.appendChild(li);
     });
@@ -334,8 +376,8 @@
   var SUGGESTIONS = {
     Work: ["Deep work block", "Respond to emails", "Team check-in", "Plan tomorrow's priorities"],
     Health: ["Workout", "Prep a healthy meal", "Stretch / mobility", "Get to bed on time"],
-    Personal: ["Call a friend or family member", "Tidy up a space", "Run an errand", "Free time / hobby"],
-    Learning: ["Read for 30 minutes", "Practice a skill", "Watch a course lesson", "Journal / review notes"]
+    Chores: ["Do laundry", "Grocery shopping", "Clean the house", "Wash the dishes"],
+    Learning: ["Reading", "Practice a skill", "Watch a course lesson", "Journal / review notes"]
   };
   var OTHER_VALUE = "__other__";
 
