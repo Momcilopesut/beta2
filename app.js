@@ -177,6 +177,9 @@
     { value: "smile", label: "🙂" }
   ];
 
+  var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 4.5l5 5L8 21H3v-5Z"/><path d="M12.5 6.5l5 5"/></svg>';
+  var ICON_REMOVE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg>';
+
   function setFeedback(key, id, value) {
     var tasks = getTasks(key);
     var task = tasks.find(function (t) { return t.id === id; });
@@ -241,24 +244,34 @@
         row.appendChild(span);
       }
 
+      var actions = document.createElement("span");
+      actions.className = "task-actions";
+
       if (allowEdit) {
         var edit = document.createElement("button");
+        edit.type = "button";
         edit.className = "task-edit";
-        edit.textContent = "edit";
+        edit.innerHTML = ICON_EDIT;
+        edit.title = "Edit task";
+        edit.setAttribute("aria-label", "Edit task");
         edit.addEventListener("click", function () {
           startEdit(task);
         });
-        row.appendChild(edit);
+        actions.appendChild(edit);
       }
 
       var del = document.createElement("button");
+      del.type = "button";
       del.className = "task-delete";
-      del.textContent = "remove";
+      del.innerHTML = ICON_REMOVE;
+      del.title = "Remove task";
+      del.setAttribute("aria-label", "Remove task");
       del.addEventListener("click", function () {
         deleteTask(key, task.id);
         render();
       });
-      row.appendChild(del);
+      actions.appendChild(del);
+      row.appendChild(actions);
 
       li.appendChild(row);
 

@@ -220,6 +220,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .task-feedback {
@@ -255,13 +256,15 @@ body {
 }
 
 .task-text {
-  flex: 1;
+  flex: 1 1 100px;
+  min-width: 100px;
   font-size: 15px;
   word-break: break-word;
 }
 
 .task-icon {
-  flex: 1;
+  flex: 1 1 100px;
+  min-width: 100px;
   display: flex;
   align-items: center;
 }
@@ -367,14 +370,33 @@ body {
   text-decoration: line-through;
 }
 
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
 .task-delete,
 .task-edit {
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 13px;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 5px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.task-delete svg,
+.task-edit svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .task-edit:hover {
