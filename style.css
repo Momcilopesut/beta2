@@ -238,6 +238,7 @@ body {
   cursor: pointer;
   opacity: 0.35;
   filter: grayscale(1);
+  transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease, font-size 0.15s ease;
 }
 
 .feedback-btn:hover {
@@ -246,6 +247,9 @@ body {
 
 .feedback-btn.selected {
   opacity: 1;
+  filter: none;
+  font-size: 24px;
+  animation: slot-pop 0.22s ease;
 }
 
 .task-item input[type="checkbox"] {

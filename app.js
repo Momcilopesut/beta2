@@ -194,7 +194,7 @@
   // plain downloadable app has no server, so this is a no-op here.
   function recordFeedback(key, task) {}
 
-  function renderList(listEl, emptyEl, key, showCheckbox, allowEdit) {
+  function renderList(listEl, emptyEl, key, showCheckbox, onEdit) {
     var tasks = sortedTasks(key);
     listEl.innerHTML = "";
     emptyEl.style.display = tasks.length === 0 ? "block" : "none";
@@ -247,7 +247,7 @@
       var actions = document.createElement("span");
       actions.className = "task-actions";
 
-      if (allowEdit) {
+      if (onEdit) {
         var edit = document.createElement("button");
         edit.type = "button";
         edit.className = "task-edit";
@@ -255,7 +255,7 @@
         edit.title = "Edit task";
         edit.setAttribute("aria-label", "Edit task");
         edit.addEventListener("click", function () {
-          startEdit(task);
+          onEdit(task);
         });
         actions.appendChild(edit);
       }
@@ -307,13 +307,16 @@
     document.getElementById("today-progress").textContent =
       todayTasks.length === 0 ? "" : doneCount + " of " + todayTasks.length + " done";
 
-    renderList(document.getElementById("today-list"), document.getElementById("today-empty"), tKey, true, false);
-    renderList(document.getElementById("plan-list"), document.getElementById("plan-empty"), pKey, false, true);
+    renderList(document.getElementById("today-list"), document.getElementById("today-empty"), tKey, true,
+      todayPlanner ? function (task) { todayPlanner.startEdit(task); } : null);
+    renderList(document.getElementById("plan-list"), document.getElementById("plan-empty"), pKey, false,
+      tomorrowPlanner ? function (task) { tomorrowPlanner.startEdit(task); } : null);
 
     var streak = computeStreak();
     document.getElementById("streak").textContent = streak > 0 ? streak + " day streak" : "";
 
-    if (timeGrid) timeGrid.refresh();
+    if (todayPlanner) todayPlanner.timeGrid.refresh();
+    if (tomorrowPlanner) tomorrowPlanner.timeGrid.refresh();
   }
 
   function setupTabs() {
@@ -335,20 +338,22 @@
     return slots;
   }
 
-  function takenSlots(excludeId) {
+  function takenSlots(dayKey, excludeId) {
     var taken = {};
-    getTasks(tomorrowKey()).forEach(function (task) {
+    getTasks(dayKey).forEach(function (task) {
       if (task.id === excludeId) return;
       (task.times || []).forEach(function (t) { taken[t] = true; });
     });
     return taken;
   }
 
-  function setupTimeGrid() {
-    var grid = document.getElementById("time-grid");
-    var summary = document.getElementById("time-summary");
+  // ids: {grid, summary, clear} element ids. targetKeyFn returns the
+  // date key (today or tomorrow) this grid currently schedules into.
+  function setupTimeGrid(ids, targetKeyFn) {
+    var grid = document.getElementById(ids.grid);
+    var summary = document.getElementById(ids.summary);
     var selected = {};
-    var lastKey = tomorrowKey();
+    var lastKey = targetKeyFn();
     var excludeId = null;
     // The most recently added slot, used as the start of a fill range
     // when the next pick isn't adjacent to it; cleared on deselect so a
@@ -361,17 +366,17 @@
       summary.textContent = times.length ? formatTimes(times) : "No time selected";
     }
 
-    // Rebuilds the grid from scratch, leaving out any slot a task for
-    // tomorrow already occupies (except the task currently being edited).
+    // Rebuilds the grid from scratch, leaving out any slot a task on
+    // the target day already occupies (except the task being edited).
     function renderGrid() {
-      var currentKey = tomorrowKey();
+      var currentKey = targetKeyFn();
       if (currentKey !== lastKey) {
         lastKey = currentKey;
         selected = {};
         excludeId = null;
         anchorSlot = null;
       }
-      var taken = takenSlots(excludeId);
+      var taken = takenSlots(currentKey, excludeId);
       grid.innerHTML = "";
       buttons = {};
       allSlots().forEach(function (slot) {
@@ -429,7 +434,7 @@
       updateSummary();
     });
 
-    document.getElementById("time-clear").addEventListener("click", function () {
+    document.getElementById(ids.clear).addEventListener("click", function () {
       reset();
     });
 
@@ -497,10 +502,11 @@
 
   // Once a category is picked, offers 4 suggested tasks for it plus
   // "Other"; picking a suggestion fills the task name for you.
-  function setupCategoryPicker() {
-    var categorySelect = document.getElementById("plan-category");
-    var suggestionSelect = document.getElementById("plan-suggestion");
-    var textInput = document.getElementById("plan-input");
+  // ids: {category, suggestion, input} element ids.
+  function setupCategoryPicker(ids) {
+    var categorySelect = document.getElementById(ids.category);
+    var suggestionSelect = document.getElementById(ids.suggestion);
+    var textInput = document.getElementById(ids.input);
 
     function populate() {
       var options = SUGGESTIONS[categorySelect.value];
@@ -556,47 +562,58 @@
     };
   }
 
-  var editingTaskId = null;
-  var categoryPicker;
+  // Wires up one day's whole add/edit form: its category picker, time
+  // grid, and submit/cancel behavior, all scoped to targetKeyFn's date
+  // (today or tomorrow). Returns a handle renderList uses to start an
+  // edit from either task list.
+  // ids: {form, input, category, suggestion, submit, cancel, timeGrid,
+  //       timeSummary, timeClear} element ids.
+  function setupDayPlanner(ids, targetKeyFn) {
+    var categoryPicker = setupCategoryPicker({ category: ids.category, suggestion: ids.suggestion, input: ids.input });
+    var timeGrid = setupTimeGrid({ grid: ids.timeGrid, summary: ids.timeSummary, clear: ids.timeClear }, targetKeyFn);
+    var editingTaskId = null;
 
-  function startEdit(task) {
-    editingTaskId = task.id;
-    categoryPicker.loadForEdit(task);
-    timeGrid.loadForEdit(task.id, task.times);
-    document.getElementById("plan-form-submit").textContent = "Save";
-    document.getElementById("plan-cancel-edit").hidden = false;
-    document.getElementById("plan-input").focus();
-  }
+    var form = document.getElementById(ids.form);
+    var input = document.getElementById(ids.input);
+    var categoryInput = document.getElementById(ids.category);
+    var submitBtn = document.getElementById(ids.submit);
+    var cancelBtn = document.getElementById(ids.cancel);
 
-  function cancelEdit() {
-    editingTaskId = null;
-    document.getElementById("plan-input").value = "";
-    categoryPicker.reset();
-    timeGrid.reset();
-    document.getElementById("plan-form-submit").textContent = "Add";
-    document.getElementById("plan-cancel-edit").hidden = true;
-  }
+    function startEdit(task) {
+      editingTaskId = task.id;
+      categoryPicker.loadForEdit(task);
+      timeGrid.loadForEdit(task.id, task.times);
+      submitBtn.textContent = "Save";
+      cancelBtn.hidden = false;
+      input.focus();
+    }
 
-  function setupPlanForm(picker) {
-    categoryPicker = picker;
-    var form = document.getElementById("plan-form");
-    var input = document.getElementById("plan-input");
-    var categoryInput = document.getElementById("plan-category");
+    function cancelEdit() {
+      editingTaskId = null;
+      input.value = "";
+      categoryPicker.reset();
+      timeGrid.reset();
+      submitBtn.textContent = "Add";
+      cancelBtn.hidden = true;
+    }
 
-    document.getElementById("plan-cancel-edit").addEventListener("click", cancelEdit);
+    cancelBtn.addEventListener("click", cancelEdit);
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var text = input.value.trim();
       if (!text) return;
+      var key = targetKeyFn();
       if (editingTaskId) {
-        updateTask(tomorrowKey(), editingTaskId, text, timeGrid.getSelected(), categoryInput.value);
+        updateTask(key, editingTaskId, text, timeGrid.getSelected(), categoryInput.value);
       } else {
-        addTask(tomorrowKey(), text, timeGrid.getSelected(), categoryInput.value);
+        addTask(key, text, timeGrid.getSelected(), categoryInput.value);
       }
       cancelEdit();
       render();
     });
+
+    return { startEdit: startEdit, timeGrid: timeGrid };
   }
 
   // Re-render on date rollover if the page is left open across midnight.
@@ -818,10 +835,18 @@
     el.style.backgroundImage = "url('" + buildWallpaperTile() + "')";
   }
 
-  var timeGrid = setupTimeGrid();
+  var todayPlanner = setupDayPlanner({
+    form: "today-form", input: "today-input", category: "today-category", suggestion: "today-suggestion",
+    submit: "today-form-submit", cancel: "today-cancel-edit",
+    timeGrid: "today-time-grid", timeSummary: "today-time-summary", timeClear: "today-time-clear"
+  }, todayKey);
+  var tomorrowPlanner = setupDayPlanner({
+    form: "plan-form", input: "plan-input", category: "plan-category", suggestion: "plan-suggestion",
+    submit: "plan-form-submit", cancel: "plan-cancel-edit",
+    timeGrid: "time-grid", timeSummary: "time-summary", timeClear: "time-clear"
+  }, tomorrowKey);
   setupWallpaper();
   setupTabs();
-  setupPlanForm(setupCategoryPicker());
   watchForDateChange();
   render();
   renderInspiration();

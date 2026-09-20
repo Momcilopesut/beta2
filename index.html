@@ -39,6 +39,30 @@
         <div class="progress" id="today-progress"></div>
         <ul class="task-list" id="today-list"></ul>
         <p class="empty-state" id="today-empty">No tasks planned for today. Plan tonight for tomorrow.</p>
+        <form id="today-form" class="add-form">
+          <div class="add-form-row">
+            <select id="today-category" aria-label="Category">
+              <option value="">No category</option>
+              <option value="Work">Work</option>
+              <option value="Health">Health</option>
+              <option value="Chores">Chores</option>
+              <option value="Learning">Learning</option>
+            </select>
+            <select id="today-suggestion" aria-label="Suggested task" hidden></select>
+          </div>
+          <div class="add-form-row">
+            <input type="text" id="today-input" placeholder="Add a task for today" autocomplete="off">
+            <button type="submit" id="today-form-submit">Add</button>
+            <button type="button" id="today-cancel-edit" hidden>Cancel</button>
+          </div>
+        </form>
+        <div class="time-block">
+          <div class="time-block-header">
+            <span id="today-time-summary">No time selected</span>
+            <button type="button" id="today-time-clear">Clear</button>
+          </div>
+          <div class="time-grid" id="today-time-grid"></div>
+        </div>
       </section>
 
       <section id="view-plan" class="view">
