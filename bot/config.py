@@ -84,6 +84,9 @@ class Settings:
     v3_vwap_gap_pct: float = 0.6  # ...and price at least 0.6% below VWAP
     v3_exhaustion_pct: float = 1.75  # after noon, skip pullbacks if QQQ already moved this much
     v3_vwap_target: bool = False  # VWAP reversion also exits fully when price reaches VWAP
+    # Only trade on trend days: no VWAP reversion, and ORB only once the 10:00
+    # regime confirms a trend in the same direction (from the 2026 diagnosis).
+    v3_trend_days_only: bool = False
     v3_entry_cutoff: time = time(15, 45)  # no new v3 entries after this time
 
     @property
@@ -142,6 +145,7 @@ class Settings:
             v3_vwap_gap_pct=float(_env("V3_VWAP_GAP_PCT", "0.6")),
             v3_exhaustion_pct=float(_env("V3_EXHAUSTION_PCT", "1.75")),
             v3_vwap_target=_env("V3_VWAP_TARGET", "false").lower() in ("true", "1", "yes"),
+            v3_trend_days_only=_env("V3_TREND_DAYS_ONLY", "false").lower() in ("true", "1", "yes"),
             v3_entry_cutoff=_parse_time(_env("V3_ENTRY_CUTOFF", "15:45")),
         )
 

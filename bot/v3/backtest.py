@@ -163,7 +163,10 @@ def v3_stats(result: V3BacktestResult) -> dict:
             "pnl": round(sum(t.pnl for t in group), 2),
             "avg_r": round(sum(t.realized_r for t in group) / len(group), 2),
         }
+    rs = pd.Series([t.realized_r for t in trades], dtype=float)
+    se = float(rs.std(ddof=1) / len(rs) ** 0.5) if len(rs) > 1 else float("nan")
     return {
+        "avg_r_se": round(se, 3),
         "final_equity": round(final, 2),
         "total_return_pct": round((final / result.starting_equity - 1) * 100, 2),
         "trades": len(trades),
@@ -187,7 +190,7 @@ def format_v3_report(result: V3BacktestResult) -> str:
         f"  Max drawdown:    {s['max_drawdown_pct']:.2f}%",
         f"  Trades:          {s['trades']}",
         f"  Win rate:        {s['win_rate_pct']:.1f}%",
-        f"  Avg trade:       {s['avg_r']:+.3f}R",
+        f"  Avg trade:       {s['avg_r']:+.3f}R  (uncertainty +/- {2 * s['avg_r_se']:.2f}R)",
         f"  Profit factor:   {s['profit_factor']}",
         f"  Regime days:     {s['regime_days']}",
     ]

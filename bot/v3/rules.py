@@ -94,10 +94,19 @@ class SessionScanner:
             self.regime, pct, slope = classify_regime(qqq, self.s)
             self.regime_info = (pct, slope)
 
-        signal = self._orb(ts, end_t, qqq, frames)
+        signal = None
+        if not self.s.v3_trend_days_only:
+            signal = self._orb(ts, end_t, qqq, frames)
+        elif self.regime in (TREND_BULL, TREND_BEAR):
+            # Trend-days-only: ORB waits for the 10:00 regime and must agree with it.
+            signal = self._orb(ts, end_t, qqq, frames)
+            expected = BULL_ETF if self.regime == TREND_BULL else BEAR_ETF
+            if signal is not None and signal.symbol != expected:
+                signal = None
         if signal is None and self.regime is not None and end_t >= REGIME_TIME:
             if self.regime == ROTATIONAL:
-                signal = self._vwap_reversion(ts, frames)
+                if not self.s.v3_trend_days_only:
+                    signal = self._vwap_reversion(ts, frames)
             else:
                 signal = self._ema_pullback(ts, end_t, qqq, frames)
         if signal is not None:

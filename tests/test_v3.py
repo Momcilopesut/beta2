@@ -278,3 +278,15 @@ def test_diagnose_runs():
     assert len(fwd) == len(result.trades)
     text = diagnose(result, data, S)
     assert "After entry, ignoring the bot's exits" in text and "By strategy and exit reason" in text
+
+
+def test_trend_days_only_skips_rotational_and_early_orb():
+    s = Settings(strategy="v3", slippage_bps=0, v3_trend_days_only=True)
+    data = synthetic_leveraged(days=60, seed=2)
+    result = run_v3_backtest(data, s, starting_equity=100_000)
+    for t in result.trades:
+        regime = result.regimes[t.entry_time.date()]
+        assert regime in (TREND_BULL, TREND_BEAR)
+        assert t.strategy != "STRAT_2_VWAP"
+        assert t.entry_time.time() >= time(10, 0)
+        assert t.symbol == ("TQQQ" if regime == TREND_BULL else "SQQQ")

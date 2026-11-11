@@ -204,6 +204,33 @@ def cmd_diagnose(args: argparse.Namespace, settings: Settings) -> None:
     print(diagnose(result, data, v3))
 
 
+def cmd_holdout(args: argparse.Namespace, settings: Settings) -> None:
+    """Out-of-sample test of the trend-days-only variant against plain v3.1 (.env values, no learning)."""
+    from bot.v3.backtest import format_v3_report, run_v3_backtest
+
+    base = replace(settings, strategy="v3", state_path="")
+    variant = replace(base, v3_trend_days_only=True)
+    data = _v3_data(args, base)
+    plain = run_v3_backtest(data, base, starting_equity=args.equity)
+    trend = run_v3_backtest(data, variant, starting_equity=args.equity)
+
+    print("=" * 62)
+    print("RULE (decided before seeing this data): the trend-days-only variant PASSES")
+    print("if its average trade is above 0R AND its total return is above 0%.")
+    print("=" * 62)
+    print("[A] v3.1 as built")
+    print(format_v3_report(plain))
+    print("=" * 62)
+    print("[B] v3.1 trend days only")
+    print(format_v3_report(trend))
+    print("=" * 62)
+    st = trend.stats
+    passed = st["avg_r"] > 0 and st["total_return_pct"] > 0
+    print(f"RESULT: {'PASS' if passed else 'FAIL'} (avg {st['avg_r']:+.3f}R, total {st['total_return_pct']:+.2f}%, {st['trades']} trades)")
+    if passed and st["avg_r"] - 2 * st["avg_r_se"] <= 0:
+        print("Note: the uncertainty range still includes 0R, so this is weak evidence, not proof.")
+
+
 def cmd_report(args: argparse.Namespace, settings: Settings) -> None:
     from bot.v3.report import DEFAULT_LOG, audit
 
@@ -277,6 +304,13 @@ def main() -> None:
     dg.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
     dg.add_argument("--base-params", action="store_true", help="Ignore learned params, use .env values")
 
+    ho = sub.add_parser("holdout", help="Out-of-sample test: v3.1 vs v3.1 trend days only")
+    ho.add_argument("--start", help="Start date YYYY-MM-DD (Alpaca download)")
+    ho.add_argument("--end", help="End date YYYY-MM-DD")
+    ho.add_argument("--synthetic", action="store_true", help="Use random-walk bars (no API keys needed)")
+    ho.add_argument("--days", type=int, default=60, help="Days of synthetic data")
+    ho.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
+
     rp = sub.add_parser("report", help="Per-strategy review of the v3.1 trade log")
     rp.add_argument("--csv", help="Trade log to review (default logs/v3_trades.csv)")
     rp.add_argument("--last", type=int, help="Only the most recent N trades")
@@ -304,6 +338,8 @@ def main() -> None:
         cmd_compare(args, settings)
     elif args.command == "diagnose":
         cmd_diagnose(args, settings)
+    elif args.command == "holdout":
+        cmd_holdout(args, settings)
     elif args.command == "report":
         cmd_report(args, settings)
     else:
