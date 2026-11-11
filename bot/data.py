@@ -1,0 +1,112 @@
+"""Market data: Alpaca historical bars, CSV files, and synthetic bars for testing."""
+
+from __future__ import annotations
+
+from datetime import datetime, time, timedelta
+
+import numpy as np
+import pandas as pd
+
+from .config import Settings
+from .strategy import NY
+
+COLUMNS = ["open", "high", "low", "close", "volume"]
+MARKET_OPEN = time(9, 30)
+MARKET_CLOSE = time(16, 0)
+
+
+def regular_hours(bars: pd.DataFrame) -> pd.DataFrame:
+    """Keep only bars that start within regular trading hours (9:30-16:00 ET)."""
+    local = bars.index.tz_convert(NY).time
+    mask = [(MARKET_OPEN <= t < MARKET_CLOSE) for t in local]
+    return bars[mask]
+
+
+def _normalize(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.rename(columns=str.lower)
+    missing = [c for c in COLUMNS if c not in df.columns]
+    if missing:
+        raise ValueError(f"Bars are missing columns: {missing}")
+    df = df[COLUMNS].astype(float)
+    if df.index.tz is None:
+        df.index = df.index.tz_localize("UTC")
+    return df.sort_index()
+
+
+def fetch_alpaca_bars(
+    settings: Settings,
+    symbol: str,
+    start: datetime,
+    end: datetime | None = None,
+) -> pd.DataFrame:
+    """Download intraday bars from Alpaca (free IEX feed), regular hours only."""
+    from alpaca.data.enums import DataFeed
+    from alpaca.data.historical import StockHistoricalDataClient
+    from alpaca.data.requests import StockBarsRequest
+    from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
+
+    settings.require_credentials()
+    client = StockHistoricalDataClient(settings.api_key, settings.api_secret)
+    request = StockBarsRequest(
+        symbol_or_symbols=symbol,
+        timeframe=TimeFrame(settings.timeframe_minutes, TimeFrameUnit.Minute),
+        start=start,
+        end=end,
+        feed=DataFeed.IEX,
+    )
+    df = client.get_stock_bars(request).df
+    if df.empty:
+        return pd.DataFrame(columns=COLUMNS, index=pd.DatetimeIndex([], tz="UTC"))
+    if isinstance(df.index, pd.MultiIndex):
+        df = df.xs(symbol, level="symbol")
+    return regular_hours(_normalize(df))
+
+
+def load_csv(path: str) -> pd.DataFrame:
+    """Load bars from a CSV with a timestamp column plus open/high/low/close/volume.
+
+    Timestamps without a timezone are assumed to be UTC.
+    """
+    df = pd.read_csv(path)
+    ts_col = next((c for c in df.columns if c.lower() in ("timestamp", "time", "datetime", "date")), None)
+    if ts_col is None:
+        raise ValueError("CSV needs a 'timestamp' column")
+    df.index = pd.to_datetime(df.pop(ts_col), utc=True)
+    return regular_hours(_normalize(df))
+
+
+def synthetic_bars(
+    days: int = 20,
+    timeframe_minutes: int = 5,
+    start_price: float = 100.0,
+    seed: int = 42,
+    start_date: str = "2025-01-06",
+) -> pd.DataFrame:
+    """Random-walk intraday bars, useful for trying the bot without API keys.
+
+    Synthetic data has no real edge, so results say nothing about live performance.
+    """
+    rng = np.random.default_rng(seed)
+    bars_per_day = int((6.5 * 60) // timeframe_minutes)
+    rows, index = [], []
+    price = start_price
+    day = pd.Timestamp(start_date)
+    produced = 0
+    while produced < days:
+        if day.weekday() < 5:
+            session_start = pd.Timestamp.combine(day.date(), MARKET_OPEN).tz_localize(NY)
+            drift = rng.normal(0, 0.0004)
+            for k in range(bars_per_day):
+                ts = session_start + timedelta(minutes=k * timeframe_minutes)
+                ret = drift + rng.normal(0, 0.0015)
+                o = price
+                c = max(0.01, o * (1 + ret))
+                h = max(o, c) * (1 + abs(rng.normal(0, 0.0007)))
+                l = min(o, c) * (1 - abs(rng.normal(0, 0.0007)))
+                v = float(rng.integers(5_000, 50_000))
+                rows.append((o, h, l, c, v))
+                index.append(ts.tz_convert("UTC"))
+                price = c
+            produced += 1
+        day += timedelta(days=1)
+    return pd.DataFrame(rows, columns=COLUMNS, index=pd.DatetimeIndex(index, name="timestamp"))
