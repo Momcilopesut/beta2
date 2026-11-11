@@ -48,3 +48,29 @@ def test_random_data_has_no_timing_edge_on_average():
     assert abs(np.mean(excess)) < 0.01  # within 1% per trade of zero
     passed, msg = verdict(r)
     assert "RESULT" in msg
+
+
+def test_coverage_check_flags_missing_and_short_history():
+    from bot.swing import _empty, check_coverage
+
+    data = synthetic_daily(years=1.5, seed=2)
+    data["SPY"] = _empty()
+    problems = check_coverage(data, date(2021, 3, 1))
+    assert any(p.startswith("SPY: no data") for p in problems)
+    assert any("only" in p for p in problems if not p.startswith("SPY"))
+
+
+def test_yahoo_loader_normalizes(monkeypatch):
+    import sys
+    import types
+
+    from bot.swing import fetch_daily_yahoo
+
+    idx = pd.DatetimeIndex(pd.bdate_range("2018-01-02", periods=3), tz="America/New_York")
+    frame = pd.DataFrame({"Open": [1.0, 2, 3], "High": [1.0, 2, 3], "Low": [1.0, 2, 3], "Close": [1.0, 2, 3],
+                          "Volume": [10, 20, 30], "Dividends": 0.0, "Stock Splits": 0.0}, index=idx)
+    fake = types.SimpleNamespace(Ticker=lambda sym: types.SimpleNamespace(history=lambda **kw: frame))
+    monkeypatch.setitem(sys.modules, "yfinance", fake)
+    df = fetch_daily_yahoo(None, "SPY", date(2018, 1, 1), date(2018, 1, 5))
+    assert list(df.columns) == ["open", "high", "low", "close", "volume"]
+    assert df.index[0] == date(2018, 1, 2)

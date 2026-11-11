@@ -234,7 +234,10 @@ def cmd_holdout(args: argparse.Namespace, settings: Settings) -> None:
 def cmd_swingtest(args: argparse.Namespace, settings: Settings) -> None:
     from datetime import date, timedelta
 
-    from bot.swing import UNIVERSE, fetch_daily, format_swing_report, run_swing_backtest, synthetic_daily, verdict
+    from bot.swing import (
+        UNIVERSE, check_coverage, fetch_daily, fetch_daily_yahoo, format_swing_report, run_swing_backtest,
+        synthetic_daily, verdict,
+    )
 
     if args.synthetic:
         data = synthetic_daily(years=3)
@@ -245,7 +248,18 @@ def cmd_swingtest(args: argparse.Namespace, settings: Settings) -> None:
             raise SystemExit("--start and --end are required (or use --synthetic)")
         start, end = _date(args.start).date(), _date(args.end).date()
         warmup = start - timedelta(days=420)  # enough history for the 200-day average
-        data = {sym: fetch_daily(settings, sym, warmup, end) for sym in UNIVERSE}
+        fetch = fetch_daily_yahoo if args.source == "yahoo" else fetch_daily
+        data = {sym: fetch(settings, sym, warmup, end) for sym in UNIVERSE}
+        problems = check_coverage(data, start)
+        if problems:
+            print("Not enough data for a fair test:")
+            for p in problems:
+                print("  " + p)
+            if args.source != "yahoo":
+                print("Alpaca's free feed has limited history. Try Yahoo Finance instead:")
+                print("  pip install yfinance")
+                print(f"  python main.py swingtest --start {args.start} --end {args.end} --equity {args.equity:g} --source yahoo")
+            raise SystemExit(1)
 
     print("=" * 66)
     print("RULE (decided before seeing this data): the swing strategy PASSES if its")
@@ -360,6 +374,8 @@ def main() -> None:
     sw.add_argument("--end", help="Test end YYYY-MM-DD")
     sw.add_argument("--synthetic", action="store_true", help="Use random-walk daily bars (no API keys needed)")
     sw.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
+    sw.add_argument("--source", choices=["alpaca", "yahoo"], default="alpaca",
+                    help="Daily data source (yahoo has longer history; needs: pip install yfinance)")
 
     swp = sub.add_parser("swing-paper", help="Paper trade the swing strategy (runs once each morning)")
     swp.add_argument("--once", action="store_true", help="Do today's run now and exit (market must be open)")

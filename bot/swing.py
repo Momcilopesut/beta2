@@ -76,10 +76,47 @@ def fetch_daily(settings: Settings, symbol: str, start: date, end: date) -> pd.D
         adjustment=Adjustment.ALL,
     )
     df = client.get_stock_bars(request).df
+    if df.empty:
+        return _empty()
     if isinstance(df.index, pd.MultiIndex):
         df = df.xs(symbol, level="symbol")
     df.index = pd.Index(df.index.tz_convert(NY).date, name="date")
     return df[["open", "high", "low", "close", "volume"]].astype(float).sort_index()
+
+
+def fetch_daily_yahoo(_settings: Settings, symbol: str, start: date, end: date) -> pd.DataFrame:
+    """Split- and dividend-adjusted daily bars from Yahoo Finance (free, long history)."""
+    try:
+        import yfinance as yf
+    except ImportError as exc:
+        raise SystemExit("Yahoo data needs the yfinance package. Install it with:  pip install yfinance") from exc
+    df = yf.Ticker(symbol).history(start=str(start), end=str(end + timedelta(days=1)), auto_adjust=True)
+    if df is None or df.empty:
+        return _empty()
+    df = df.rename(columns=str.lower)
+    idx = df.index.tz_convert(NY) if df.index.tz is not None else df.index
+    df.index = pd.Index([d.date() for d in idx], name="date")
+    return df[["open", "high", "low", "close", "volume"]].astype(float).sort_index()
+
+
+def _empty() -> pd.DataFrame:
+    return pd.DataFrame(columns=["open", "high", "low", "close", "volume"], index=pd.Index([], name="date"), dtype=float)
+
+
+def check_coverage(data: dict[str, pd.DataFrame], start: date) -> list[str]:
+    """Problems that would make a test meaningless (missing data or too little history)."""
+    problems = []
+    for sym, df in data.items():
+        if df.empty:
+            problems.append(f"{sym}: no data returned for this period")
+            continue
+        before = int((df.index < start).sum())
+        if before < TREND_SMA:
+            problems.append(
+                f"{sym}: data starts {df.index[0]}, only {before} trading days before {start} "
+                f"(the {TREND_SMA}-day average needs {TREND_SMA})"
+            )
+    return problems
 
 
 def synthetic_daily(years: float = 3, seed: int = 1, start: str = "2021-01-04") -> dict[str, pd.DataFrame]:
