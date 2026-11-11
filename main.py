@@ -258,6 +258,23 @@ def cmd_swingtest(args: argparse.Namespace, settings: Settings) -> None:
     print(verdict(result)[1])
 
 
+def cmd_swing_trade(args: argparse.Namespace, settings: Settings) -> None:
+    from bot.swing_live import SwingTrader
+
+    settings.paper = args.command == "swing-paper"
+    if not settings.paper and not args.i_understand_the_risk:
+        raise SystemExit("Live trading uses real money. Re-run with --i-understand-the-risk to confirm.")
+    os.makedirs("logs", exist_ok=True)
+    handler = logging.FileHandler("logs/swing.log")
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    logging.getLogger().addHandler(handler)
+    trader = SwingTrader(settings)
+    if args.once:
+        trader.run_once()
+    else:
+        trader.run_forever()
+
+
 def cmd_report(args: argparse.Namespace, settings: Settings) -> None:
     from bot.v3.report import DEFAULT_LOG, audit
 
@@ -344,6 +361,12 @@ def main() -> None:
     sw.add_argument("--synthetic", action="store_true", help="Use random-walk daily bars (no API keys needed)")
     sw.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
 
+    swp = sub.add_parser("swing-paper", help="Paper trade the swing strategy (runs once each morning)")
+    swp.add_argument("--once", action="store_true", help="Do today's run now and exit (market must be open)")
+    swl = sub.add_parser("swing-live", help="Trade the swing strategy with real money")
+    swl.add_argument("--once", action="store_true", help="Do today's run now and exit (market must be open)")
+    swl.add_argument("--i-understand-the-risk", action="store_true")
+
     rp = sub.add_parser("report", help="Per-strategy review of the v3.1 trade log")
     rp.add_argument("--csv", help="Trade log to review (default logs/v3_trades.csv)")
     rp.add_argument("--last", type=int, help="Only the most recent N trades")
@@ -375,6 +398,8 @@ def main() -> None:
         cmd_holdout(args, settings)
     elif args.command == "swingtest":
         cmd_swingtest(args, settings)
+    elif args.command in ("swing-paper", "swing-live"):
+        cmd_swing_trade(args, settings)
     elif args.command == "report":
         cmd_report(args, settings)
     else:

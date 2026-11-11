@@ -98,6 +98,25 @@ number of days. That shows whether the timing adds anything beyond the market ri
 python main.py swingtest --start 2024-01-01 --end 2024-12-31 --equity 500
 ```
 
+It passed on 2024, 2021–2023 and 2025–2026, each tested once with the pass rule
+fixed in advance. It's the only strategy in this repo that has shown an edge on data
+it wasn't designed on.
+
+**Paper trading it:** `bot/swing_live.py` runs once per trading day, at 9:31 New York
+time. It reads the previous day's closing prices, sells funds that recovered (or that
+it has held for 10 days), and buys new dips with a quarter of the account each. That
+matches the backtest's "signal at the close, trade at the next open" exactly.
+
+```bash
+caffeinate -i python main.py swing-paper          # leave running; trades each morning
+python main.py swing-paper --once                 # or do today's run by hand (market open)
+```
+
+State is kept in `state/swing.json`, trades go to `logs/swing_trades.csv`, and the log
+is in `logs/swing.log`. Run it **instead of** the day-trading bots, because the original
+also trades SPY and QQQ on the same account. There's no stop-loss (the tested rules
+don't use one); the 10-day limit caps how long a losing position is held.
+
 ## Small accounts (under $25,000)
 
 The bot switches to small-account mode automatically when equity is below
