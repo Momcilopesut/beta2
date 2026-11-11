@@ -79,6 +79,25 @@ and they lose value over time in choppy markets (that's why the bot never holds 
 overnight). On random test data, v3.1 averaged about 0R per trade. Before trusting it,
 compare it with the original on real data using `python main.py compare`.
 
+## Swing strategy test (multi-day)
+
+`bot/swing.py` tests a different kind of strategy: buying short dips in an uptrend and
+holding for a few days (Larry Connors' published RSI(2) rules, with standard values and
+no tuning):
+
+- Funds: SPY, QQQ, IWM and DIA, each allowed up to a quarter of the account.
+- **Buy** at the next open when the fund closed above its 200-day average and its 2-day
+  RSI closed below 10.
+- **Sell** at the next open after it closes above its 5-day average, or after 10 days.
+
+Positions are held overnight, so these trades never count as day trades. Each trade is
+compared with buying the same fund on a random day and holding it for the same
+number of days. That shows whether the timing adds anything beyond the market rising.
+
+```bash
+python main.py swingtest --start 2024-01-01 --end 2024-12-31 --equity 500
+```
+
 ## Small accounts (under $25,000)
 
 The bot switches to small-account mode automatically when equity is below

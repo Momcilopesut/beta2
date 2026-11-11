@@ -231,6 +231,33 @@ def cmd_holdout(args: argparse.Namespace, settings: Settings) -> None:
         print("Note: the uncertainty range still includes 0R, so this is weak evidence, not proof.")
 
 
+def cmd_swingtest(args: argparse.Namespace, settings: Settings) -> None:
+    from datetime import date, timedelta
+
+    from bot.swing import UNIVERSE, fetch_daily, format_swing_report, run_swing_backtest, synthetic_daily, verdict
+
+    if args.synthetic:
+        data = synthetic_daily(years=3)
+        last = max(data["SPY"].index)
+        start, end = date(last.year, 1, 1), last
+    else:
+        if not args.start or not args.end:
+            raise SystemExit("--start and --end are required (or use --synthetic)")
+        start, end = _date(args.start).date(), _date(args.end).date()
+        warmup = start - timedelta(days=420)  # enough history for the 200-day average
+        data = {sym: fetch_daily(settings, sym, warmup, end) for sym in UNIVERSE}
+
+    print("=" * 66)
+    print("RULE (decided before seeing this data): the swing strategy PASSES if its")
+    print("total return is above 0% AND its average trade beats buying the same fund")
+    print("on a random day and holding it for the same number of days.")
+    print("=" * 66)
+    result = run_swing_backtest(data, start, end, args.equity, settings.slippage_bps)
+    print(format_swing_report(result))
+    print("=" * 66)
+    print(verdict(result)[1])
+
+
 def cmd_report(args: argparse.Namespace, settings: Settings) -> None:
     from bot.v3.report import DEFAULT_LOG, audit
 
@@ -311,6 +338,12 @@ def main() -> None:
     ho.add_argument("--days", type=int, default=60, help="Days of synthetic data")
     ho.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
 
+    sw = sub.add_parser("swingtest", help="Test the multi-day dip-buying swing strategy")
+    sw.add_argument("--start", help="Test start YYYY-MM-DD")
+    sw.add_argument("--end", help="Test end YYYY-MM-DD")
+    sw.add_argument("--synthetic", action="store_true", help="Use random-walk daily bars (no API keys needed)")
+    sw.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
+
     rp = sub.add_parser("report", help="Per-strategy review of the v3.1 trade log")
     rp.add_argument("--csv", help="Trade log to review (default logs/v3_trades.csv)")
     rp.add_argument("--last", type=int, help="Only the most recent N trades")
@@ -340,6 +373,8 @@ def main() -> None:
         cmd_diagnose(args, settings)
     elif args.command == "holdout":
         cmd_holdout(args, settings)
+    elif args.command == "swingtest":
+        cmd_swingtest(args, settings)
     elif args.command == "report":
         cmd_report(args, settings)
     else:
