@@ -41,11 +41,11 @@ You can change every number in `.env`.
 3. **Holdout check:** the best variation is picked using the older 30 sessions only.
    It is then tested on the most recent 10 sessions, which were not used to pick it.
    It is adopted only if **all** of these hold:
-   - Its Sharpe ratio beats the current parameters by at least `LEARN_MARGIN` (1.0)
+   - Its Sharpe ratio beats the current parameters by at least `LEARN_MARGIN` (2.0)
      on **both** windows.
    - It made money on the held-out sessions.
    - It made enough trades to be trusted.
-   - The last change was at least `LEARN_COOLDOWN_DAYS` (5) sessions ago.
+   - The last change was at least `LEARN_COOLDOWN_DAYS` (10) sessions ago.
 4. **Risk throttle:** after a losing streak (3 days in a row, or a losing 5-day
    stretch), position sizes shrink to 75%, down to a floor of 25%. They grow back as
    results recover.
@@ -65,8 +65,9 @@ the feature off.
 
 **A word of caution:** a bot that retunes itself every day can easily fit itself to
 noise. It looks better on recent history every time without getting better at
-trading. The safeguards above make it change rarely. On random data with no real
-pattern, it should almost always keep its parameters. Learning can only tune this
+trading. The safeguards above make it change rarely. In testing on random data with no
+real pattern, it changed parameters 0–2 times in 41 trading days (about once a
+month on average). On real data, a change should be equally rare. Learning can only tune this
 strategy's settings; it can't find an edge the strategy doesn't have. Keep an eye on
 `python main.py params`, and roll back if a change makes things worse in paper trading.
 

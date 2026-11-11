@@ -52,8 +52,8 @@ class Settings:
     learn_train_days: int = 30  # sessions used to search for better parameters
     learn_val_days: int = 10  # most recent sessions held out to confirm a change
     learn_candidates: int = 24  # random variations tried per day (plus +/- 1 step neighbours)
-    learn_margin: float = 1.0  # required Sharpe improvement on BOTH training and held-out days
-    learn_cooldown_days: int = 5  # minimum sessions between parameter changes
+    learn_margin: float = 2.0  # required Sharpe improvement on BOTH training and held-out days
+    learn_cooldown_days: int = 10  # minimum sessions between parameter changes
     learn_min_trades: int = 10  # minimum trades in the training window to trust a score
     state_path: str = "state/learning.json"
 
@@ -82,8 +82,8 @@ class Settings:
             learn_train_days=int(_env("LEARN_TRAIN_DAYS", "30")),
             learn_val_days=int(_env("LEARN_VAL_DAYS", "10")),
             learn_candidates=int(_env("LEARN_CANDIDATES", "24")),
-            learn_margin=float(_env("LEARN_MARGIN", "1.0")),
-            learn_cooldown_days=int(_env("LEARN_COOLDOWN_DAYS", "5")),
+            learn_margin=float(_env("LEARN_MARGIN", "2.0")),
+            learn_cooldown_days=int(_env("LEARN_COOLDOWN_DAYS", "10")),
             learn_min_trades=int(_env("LEARN_MIN_TRADES", "10")),
             state_path=_env("STATE_PATH", "state/learning.json"),
         )
