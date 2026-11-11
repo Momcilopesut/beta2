@@ -47,6 +47,16 @@ class Settings:
     entry_end: time = time(15, 30)  # no new trades late in the day
     flatten_time: time = time(15, 50)  # close everything before the bell
 
+    # Daily self-improvement (see bot/learning.py)
+    learning_enabled: bool = True
+    learn_train_days: int = 30  # sessions used to search for better parameters
+    learn_val_days: int = 10  # most recent sessions held out to confirm a change
+    learn_candidates: int = 24  # random variations tried per day (plus +/- 1 step neighbours)
+    learn_margin: float = 1.0  # required Sharpe improvement on BOTH training and held-out days
+    learn_cooldown_days: int = 5  # minimum sessions between parameter changes
+    learn_min_trades: int = 10  # minimum trades in the training window to trust a score
+    state_path: str = "state/learning.json"
+
     @classmethod
     def from_env(cls) -> "Settings":
         load_dotenv()
@@ -68,6 +78,14 @@ class Settings:
             entry_start=_parse_time(_env("ENTRY_START", "09:45")),
             entry_end=_parse_time(_env("ENTRY_END", "15:30")),
             flatten_time=_parse_time(_env("FLATTEN_TIME", "15:50")),
+            learning_enabled=_env("LEARNING_ENABLED", "true").lower() not in ("false", "0", "no"),
+            learn_train_days=int(_env("LEARN_TRAIN_DAYS", "30")),
+            learn_val_days=int(_env("LEARN_VAL_DAYS", "10")),
+            learn_candidates=int(_env("LEARN_CANDIDATES", "24")),
+            learn_margin=float(_env("LEARN_MARGIN", "1.0")),
+            learn_cooldown_days=int(_env("LEARN_COOLDOWN_DAYS", "5")),
+            learn_min_trades=int(_env("LEARN_MIN_TRADES", "10")),
+            state_path=_env("STATE_PATH", "state/learning.json"),
         )
 
     def require_credentials(self) -> None:

@@ -29,6 +29,47 @@ so what you test is what runs.
 
 You can change every number in `.env`.
 
+## Daily self-improvement
+
+`bot/learning.py` — after each trading day closes, the bot retunes itself:
+
+1. **Journal:** records the day's P&L.
+2. **Search:** backtests about 34 variations of its current parameters on recent
+   history: EMA lengths, ATR period, stop and target distances. Each variation is one
+   or two steps away from the current values, so the parameters drift gradually
+   instead of jumping.
+3. **Holdout check:** the best variation is picked using the older 30 sessions only.
+   It is then tested on the most recent 10 sessions, which were not used to pick it.
+   It is adopted only if **all** of these hold:
+   - Its Sharpe ratio beats the current parameters by at least `LEARN_MARGIN` (1.0)
+     on **both** windows.
+   - It made money on the held-out sessions.
+   - It made enough trades to be trusted.
+   - The last change was at least `LEARN_COOLDOWN_DAYS` (5) sessions ago.
+4. **Risk throttle:** after a losing streak (3 days in a row, or a losing 5-day
+   stretch), position sizes shrink to 75%, down to a floor of 25%. They grow back as
+   results recover.
+5. **Builds on itself:** the next day's search starts from whatever was adopted.
+   Every run is saved with a version number in `state/learning.json`.
+
+```bash
+python main.py learn                                # run one learning step now (Alpaca data)
+python main.py learn --synthetic --days 80 --replay # watch it learn day by day, offline
+python main.py params                               # current params, history, live journal
+python main.py params --rollback 2                  # restore version 2 (0 = .env defaults)
+python main.py backtest --symbol SPY --start 2025-01-01 --base-params  # compare against .env values
+```
+
+`backtest` uses the learned parameters by default. Set `LEARNING_ENABLED=false` to turn
+the feature off.
+
+**A word of caution:** a bot that retunes itself every day can easily fit itself to
+noise. It looks better on recent history every time without getting better at
+trading. The safeguards above make it change rarely. On random data with no real
+pattern, it should almost always keep its parameters. Learning can only tune this
+strategy's settings; it can't find an edge the strategy doesn't have. Keep an eye on
+`python main.py params`, and roll back if a change makes things worse in paper trading.
+
 ## Setup
 
 ```bash
@@ -88,7 +129,8 @@ bot/strategy.py    indicators + signal generation
 bot/risk.py        position sizing, stop/target prices
 bot/backtest.py    bar-by-bar simulator and stats
 bot/data.py        Alpaca / CSV / synthetic bars
-bot/live.py        paper/live trading loop
+bot/live.py        paper/live trading loop (runs learning after each close)
+bot/learning.py    daily self-improvement: parameter search, holdout check, risk throttle
 tests/             pytest suite
 ```
 

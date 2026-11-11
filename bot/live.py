@@ -6,6 +6,10 @@ the same strategy code as the backtester, and acts on the last closed bar:
 - EXIT with a position: cancel the bracket legs and sell at market.
 It closes everything at FLATTEN_TIME and stops opening trades for the day once
 the account is down MAX_DAILY_LOSS_PCT from the previous close.
+
+After the close on each trading day it records the day's P&L and runs the
+self-improvement step in bot/learning.py, then trades the next day with
+whatever parameters that step settled on.
 """
 
 from __future__ import annotations
@@ -17,7 +21,8 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 
 from .config import Settings
-from .data import fetch_alpaca_bars
+from .data import fetch_alpaca_bars, fetch_history
+from .learning import LearningState, run_daily_learning
 from .risk import plan_entry
 from .strategy import ENTRY, EXIT, NY, EmaCrossVwap
 
@@ -29,12 +34,25 @@ class LiveTrader:
         from alpaca.trading.client import TradingClient
 
         settings.require_credentials()
-        self.s = settings
+        self.base = settings  # .env settings; learned values are layered on top
+        self.state = LearningState(settings.state_path)
         self.client = TradingClient(settings.api_key, settings.api_secret, paper=settings.paper)
-        self.strategy = EmaCrossVwap(settings)
+        self._load_params()
         self.last_bar_seen: dict[str, pd.Timestamp] = {}
         self.halted_date = None
         self.flattened_date = None
+        self.traded_date = None
+        self.learned_date = None
+
+    def _load_params(self) -> None:
+        self.s = self.state.apply(self.base) if self.base.learning_enabled else self.base
+        self.strategy = EmaCrossVwap(self.s)
+        log.info(
+            "Using params version %d: ema %d/%d, atr %d, stop %.2f ATR, target %.2f ATR, risk/trade %.4f",
+            self.state.version if self.base.learning_enabled else 0,
+            self.s.ema_fast, self.s.ema_slow, self.s.atr_period, self.s.stop_atr, self.s.target_atr,
+            self.s.risk_per_trade,
+        )
 
     # ---- main loop -------------------------------------------------------
 
@@ -55,6 +73,7 @@ class LiveTrader:
     def tick(self) -> None:
         clock = self.client.get_clock()
         if not clock.is_open:
+            self._end_of_day()
             wait = (clock.next_open - clock.timestamp).total_seconds()
             log.info("Market closed. Next open %s", clock.next_open.astimezone(_ny()))
             time_mod.sleep(max(0, min(wait, 15 * 60)))
@@ -63,6 +82,7 @@ class LiveTrader:
         now = datetime.now(timezone.utc)
         now_et = now.astimezone(_ny())
         today = now_et.date()
+        self.traded_date = today
 
         if now_et.time() >= self.s.flatten_time:
             if self.flattened_date != today:
@@ -87,6 +107,34 @@ class LiveTrader:
                 self._process_symbol(symbol, now, equity, positions.get(symbol), open_orders.get(symbol, []))
             except Exception:
                 log.exception("Failed to process %s", symbol)
+
+    # ---- end of day: journal + self-improvement ----------------------------
+
+    def _end_of_day(self) -> None:
+        """Run once after a session the bot traded in has closed."""
+        day = self.traded_date
+        if day is None or self.learned_date == day:
+            return
+        self.learned_date = day
+
+        account = self.client.get_account()
+        pnl = float(account.equity) - float(account.last_equity)
+        self.state.record_day(day, pnl, float(account.equity))
+        self.state.save()
+        log.info("Day %s closed with P&L %+.2f, equity %s", day, pnl, account.equity)
+
+        if not self.base.learning_enabled:
+            return
+        log.info("Running daily learning...")
+        try:
+            history = fetch_history(self.base, self.base.learn_train_days + self.base.learn_val_days + 5)
+            report = run_daily_learning(self.base, history, self.state, as_of=day)
+            for line in report.summary().splitlines():
+                log.info(line)
+            self._load_params()
+            self.last_bar_seen.clear()
+        except Exception:
+            log.exception("Daily learning failed; keeping current parameters")
 
     # ---- per-symbol logic -----------------------------------------------
 

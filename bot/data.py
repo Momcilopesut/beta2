@@ -62,6 +62,14 @@ def fetch_alpaca_bars(
     return regular_hours(_normalize(df))
 
 
+def fetch_history(settings: Settings, sessions: int) -> dict[str, pd.DataFrame]:
+    """Download roughly the last `sessions` trading days of bars for every symbol."""
+    from datetime import timezone
+
+    start = datetime.now(timezone.utc) - timedelta(days=int(sessions * 1.5) + 7)
+    return {s: fetch_alpaca_bars(settings, s, start) for s in settings.symbols}
+
+
 def load_csv(path: str) -> pd.DataFrame:
     """Load bars from a CSV with a timestamp column plus open/high/low/close/volume.
 
