@@ -186,7 +186,9 @@ def cmd_compare(args: argparse.Namespace, settings: Settings) -> None:
     print("=" * 62)
     v3_final = v3_result.stats["final_equity"]
     better = "v3.1" if v3_final > v2_final else "the original"
-    print(f"Higher return over this period: {better} (${v3_final:,.2f} vs ${v2_final:,.2f}).")
+    print(f"Higher return over this period: {better} (original ${v2_final:,.2f} vs v3.1 ${v3_final:,.2f}).")
+    if v3_final < args.equity and v2_final < args.equity:
+        print("Both lost money over this period: neither has shown an edge here.")
     print("Fewer than ~100 trades or a few months of data is not enough to call a winner.")
 
 
