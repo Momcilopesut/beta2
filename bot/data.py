@@ -67,7 +67,16 @@ def fetch_history(settings: Settings, sessions: int) -> dict[str, pd.DataFrame]:
     from datetime import timezone
 
     start = datetime.now(timezone.utc) - timedelta(days=int(sessions * 1.5) + 7)
-    return {s: fetch_alpaca_bars(settings, s, start) for s in settings.symbols}
+    return {s: fetch_alpaca_bars(settings, s, start) for s in data_symbols(settings)}
+
+
+def data_symbols(settings: Settings) -> list[str]:
+    """Symbols whose bars the active strategy needs."""
+    if settings.is_v3:
+        from .v3 import DATA_SYMBOLS
+
+        return list(DATA_SYMBOLS)
+    return settings.symbols
 
 
 def load_csv(path: str) -> pd.DataFrame:
@@ -89,8 +98,12 @@ def synthetic_bars(
     start_price: float = 100.0,
     seed: int = 42,
     start_date: str = "2025-01-06",
+    daily_drift_sd: float = 0.0004,
 ) -> pd.DataFrame:
     """Random-walk intraday bars, useful for trying the bot without API keys.
+
+    `daily_drift_sd` gives each day a small persistent drift, which makes
+    trends continue within a day; set it to 0 for a pure random walk.
 
     Synthetic data has no real edge, so results say nothing about live performance.
     """
@@ -103,7 +116,7 @@ def synthetic_bars(
     while produced < days:
         if day.weekday() < 5:
             session_start = pd.Timestamp.combine(day.date(), MARKET_OPEN).tz_localize(NY)
-            drift = rng.normal(0, 0.0004)
+            drift = rng.normal(0, daily_drift_sd) if daily_drift_sd else 0.0
             for k in range(bars_per_day):
                 ts = session_start + timedelta(minutes=k * timeframe_minutes)
                 ret = drift + rng.normal(0, 0.0015)
@@ -118,3 +131,31 @@ def synthetic_bars(
             produced += 1
         day += timedelta(days=1)
     return pd.DataFrame(rows, columns=COLUMNS, index=pd.DatetimeIndex(index, name="timestamp"))
+
+
+def synthetic_leveraged(days: int = 60, seed: int = 42, start_date: str = "2025-01-06") -> dict[str, pd.DataFrame]:
+    """Random-walk QQQ plus TQQQ (3x) and SQQQ (-3x) built bar by bar from it.
+
+    For trying the v3 system without API keys. Like all synthetic data it has
+    no real edge, so results say nothing about live performance.
+    """
+    # No daily drift: drift makes intraday trends persist, which hands breakout
+    # strategies a fake edge (ORB averaged +2R on drifting data, about 0R without).
+    qqq = synthetic_bars(days=days, timeframe_minutes=5, start_price=400.0, seed=seed,
+                         start_date=start_date, daily_drift_sd=0.0)
+    rel = qqq.div(qqq["open"], axis=0)
+
+    def lever(factor: float, start: float) -> pd.DataFrame:
+        rows, price = [], start
+        for r in rel.itertuples():
+            o = price
+            c = o * (1 + factor * (r.close - 1))
+            if factor > 0:
+                h, l = o * (1 + factor * (r.high - 1)), o * (1 + factor * (r.low - 1))
+            else:
+                h, l = o * (1 + factor * (r.low - 1)), o * (1 + factor * (r.high - 1))
+            rows.append((o, max(h, o, c), min(l, o, c), c, r.volume))
+            price = c
+        return pd.DataFrame(rows, columns=COLUMNS, index=qqq.index)
+
+    return {"QQQ": qqq, "TQQQ": lever(3.0, 80.0), "SQQQ": lever(-3.0, 20.0)}

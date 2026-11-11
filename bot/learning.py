@@ -62,6 +62,7 @@ class ParamSpec:
         return round(round(value / self.step) * self.step, 4)
 
 
+# Original strategy (EMA crossover + VWAP filter)
 TUNABLE: dict[str, ParamSpec] = {
     "ema_fast": ParamSpec(int, 3, 20, 1),
     "ema_slow": ParamSpec(int, 10, 60, 2),
@@ -70,16 +71,38 @@ TUNABLE: dict[str, ParamSpec] = {
     "target_atr": ParamSpec(float, 1.0, 6.0, 0.5),
 }
 
+# v3.1 system: trade management and the VWAP band. The entry rules' thresholds
+# stay fixed so the learner can't quietly turn v3.1 into a different system.
+TUNABLE_V3: dict[str, ParamSpec] = {
+    "v3_stop_pct": ParamSpec(float, 0.004, 0.02, 0.001),
+    "v3_shield_r": ParamSpec(float, 0.3, 1.0, 0.1),
+    "v3_scale_r_am": ParamSpec(float, 0.5, 2.0, 0.25),
+    "v3_time_stop_min": ParamSpec(int, 10, 60, 5),
+    "v3_band_sd": ParamSpec(float, 1.5, 3.0, 0.25),
+}
+
+ALL_SPECS: dict[str, ParamSpec] = {**TUNABLE, **TUNABLE_V3}
+
+
+def tunable_for(settings: Settings) -> dict[str, ParamSpec]:
+    return TUNABLE_V3 if settings.is_v3 else TUNABLE
+
 RISK_MULT_MIN = 0.25
 RISK_MULT_MAX = 1.0
 
 
 def current_params(settings: Settings) -> dict:
-    return {name: getattr(settings, name) for name in TUNABLE}
+    return {name: getattr(settings, name) for name in tunable_for(settings)}
 
 
 def is_valid(params: dict) -> bool:
-    return params["ema_fast"] < params["ema_slow"] and params["target_atr"] > params["stop_atr"]
+    if "ema_fast" in params and params["ema_fast"] >= params["ema_slow"]:
+        return False
+    if "target_atr" in params and params["target_atr"] <= params["stop_atr"]:
+        return False
+    if "v3_shield_r" in params and params["v3_shield_r"] >= params["v3_scale_r_am"]:
+        return False
+    return True
 
 
 def generate_candidates(params: dict, n_random: int, seed: int) -> list[dict]:
@@ -87,24 +110,26 @@ def generate_candidates(params: dict, n_random: int, seed: int) -> list[dict]:
     seen = {tuple(sorted(params.items()))}
     out: list[dict] = []
 
+    specs = {k: ALL_SPECS[k] for k in params}
+
     def add(candidate: dict) -> None:
-        candidate = {k: TUNABLE[k].clamp(v) for k, v in candidate.items()}
+        candidate = {k: specs[k].clamp(v) for k, v in candidate.items()}
         key = tuple(sorted(candidate.items()))
         if key not in seen and is_valid(candidate):
             seen.add(key)
             out.append(candidate)
 
-    for name, spec in TUNABLE.items():
+    for name, spec in specs.items():
         for direction in (-1, 1):
             add({**params, name: params[name] + direction * spec.step})
 
     rng = random.Random(seed)
     for _ in range(n_random * 3):
-        if len(out) >= 2 * len(TUNABLE) + n_random:
+        if len(out) >= 2 * len(specs) + n_random:
             break
         candidate = dict(params)
-        for name in rng.sample(list(TUNABLE), k=rng.randint(1, len(TUNABLE))):
-            spec = TUNABLE[name]
+        for name in rng.sample(list(specs), k=rng.randint(1, len(specs))):
+            spec = specs[name]
             candidate[name] = params[name] + rng.choice([-2, -1, 1, 2]) * spec.step
         add(candidate)
     return out
@@ -151,19 +176,27 @@ def evaluate(
     val_dates: list[date],
     equity: float = 100_000.0,
 ) -> tuple[WindowScore, WindowScore]:
-    """Backtest `settings` across all symbols; score the train and validation windows."""
+    """Backtest `settings`; score the train and validation windows."""
     pnl_by_date: dict[date, float] = {}
     trades_by_date: dict[date, int] = {}
-    for symbol, bars in bars_by_symbol.items():
-        result = run_backtest(bars, settings, symbol=symbol, starting_equity=equity)
-        for t in result.trades:
-            d = t.exit_time.tz_convert(NY).date()
-            pnl_by_date[d] = pnl_by_date.get(d, 0.0) + t.pnl
-            trades_by_date[d] = trades_by_date.get(d, 0) + 1
+    if settings.is_v3:
+        from .v3.backtest import run_v3_backtest
+
+        trades = run_v3_backtest(bars_by_symbol, settings, starting_equity=equity).trades
+        capital = equity
+    else:
+        trades = []
+        for symbol, bars in bars_by_symbol.items():
+            trades += run_backtest(bars, settings, symbol=symbol, starting_equity=equity).trades
+        capital = equity * len(bars_by_symbol)
+    for t in trades:
+        d = pd.Timestamp(t.exit_time).tz_convert(NY).date()
+        pnl_by_date[d] = pnl_by_date.get(d, 0.0) + t.pnl
+        trades_by_date[d] = trades_by_date.get(d, 0) + 1
 
     def window(dates: list[date]) -> WindowScore:
         daily = pd.Series([pnl_by_date.get(d, 0.0) for d in dates], dtype=float)
-        return score_window(daily, sum(trades_by_date.get(d, 0) for d in dates), equity * len(bars_by_symbol))
+        return score_window(daily, sum(trades_by_date.get(d, 0) for d in dates), capital)
 
     return window(train_dates), window(val_dates)
 
@@ -197,8 +230,11 @@ class LearningState:
 
     def apply(self, base: Settings) -> Settings:
         """Return `base` with the learned parameters and risk multiplier applied."""
-        learned = {k: v for k, v in self.params.items() if k in TUNABLE}
-        return replace(base, **learned, risk_per_trade=base.risk_per_trade * self.risk_multiplier)
+        learned = {k: v for k, v in self.params.items() if k in ALL_SPECS}
+        mult = self.risk_multiplier
+        return replace(
+            base, **learned, risk_per_trade=base.risk_per_trade * mult, v3_risk_pct=base.v3_risk_pct * mult
+        )
 
     def save(self) -> None:
         os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)

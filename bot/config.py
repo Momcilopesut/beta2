@@ -60,7 +60,35 @@ class Settings:
     learn_margin: float = 2.0  # required Sharpe improvement on BOTH training and held-out days
     learn_cooldown_days: int = 10  # minimum sessions between parameter changes
     learn_min_trades: int = 10  # minimum trades in the training window to trust a score
-    state_path: str = "state/learning.json"
+    state_path: str = ""  # empty = state/learning.json or state/learning_v3.json
+
+    # Which strategy to run: "ema_cross_vwap" (the original) or "v3" (bot/v3)
+    strategy: str = "ema_cross_vwap"
+
+    # v3.1 multi-strategy system (see bot/v3/__init__.py)
+    v3_risk_pct: float = 0.005  # 1R = 0.5% of equity
+    v3_max_daily_loss_pct: float = 0.01  # -2R: no new trades for the rest of the day
+    v3_max_position_pct: float = 0.5  # never more than half the account in one position
+    v3_stop_pct: float = 0.008  # initial stop 0.8% below entry (= 1R)
+    v3_shield_r: float = 0.6  # move the stop to break-even at +0.6R
+    v3_scale_r_am: float = 1.0  # sell half at +1.0R before noon...
+    v3_scale_r_pm: float = 0.7  # ...or +0.7R after noon
+    v3_pm_lock_r: float = 0.25  # after an afternoon scale, lock the stop at +0.25R
+    v3_time_stop_min: int = 30  # exit a stalled trade after 30 minutes...
+    v3_time_stop_r: float = 0.4  # ...if it is below +0.4R and has not scaled
+    v3_cooldown_min: int = 10  # wait 10 minutes after an exit before a new entry
+    v3_orb_qqq_pct: float = 0.35  # ORB needs QQQ to have moved 0.35% from the open
+    v3_trend_pct: float = 0.5  # trend day: QQQ moved 0.5% from the open by 10:00...
+    v3_trend_slope: float = 0.15  # ...and VWAP slopes at least 0.15%/hour the same way
+    v3_band_sd: float = 2.0  # VWAP reversion band, in standard deviations
+    v3_vwap_gap_pct: float = 0.6  # ...and price at least 0.6% below VWAP
+    v3_exhaustion_pct: float = 1.75  # after noon, skip pullbacks if QQQ already moved this much
+    v3_vwap_target: bool = False  # VWAP reversion also exits fully when price reaches VWAP
+    v3_entry_cutoff: time = time(15, 45)  # no new v3 entries after this time
+
+    @property
+    def is_v3(self) -> bool:
+        return self.strategy.lower() in ("v3", "v3.1")
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -94,8 +122,33 @@ class Settings:
             learn_margin=float(_env("LEARN_MARGIN", "2.0")),
             learn_cooldown_days=int(_env("LEARN_COOLDOWN_DAYS", "10")),
             learn_min_trades=int(_env("LEARN_MIN_TRADES", "10")),
-            state_path=_env("STATE_PATH", "state/learning.json"),
+            strategy=_env("STRATEGY", "ema_cross_vwap").lower(),
+            state_path=_env("STATE_PATH", ""),
+            v3_risk_pct=float(_env("V3_RISK_PCT", "0.005")),
+            v3_max_daily_loss_pct=float(_env("V3_MAX_DAILY_LOSS_PCT", "0.01")),
+            v3_max_position_pct=float(_env("V3_MAX_POSITION_PCT", "0.5")),
+            v3_stop_pct=float(_env("V3_STOP_PCT", "0.008")),
+            v3_shield_r=float(_env("V3_SHIELD_R", "0.6")),
+            v3_scale_r_am=float(_env("V3_SCALE_R_AM", "1.0")),
+            v3_scale_r_pm=float(_env("V3_SCALE_R_PM", "0.7")),
+            v3_pm_lock_r=float(_env("V3_PM_LOCK_R", "0.25")),
+            v3_time_stop_min=int(_env("V3_TIME_STOP_MIN", "30")),
+            v3_time_stop_r=float(_env("V3_TIME_STOP_R", "0.4")),
+            v3_cooldown_min=int(_env("V3_COOLDOWN_MIN", "10")),
+            v3_orb_qqq_pct=float(_env("V3_ORB_QQQ_PCT", "0.35")),
+            v3_trend_pct=float(_env("V3_TREND_PCT", "0.5")),
+            v3_trend_slope=float(_env("V3_TREND_SLOPE", "0.15")),
+            v3_band_sd=float(_env("V3_BAND_SD", "2.0")),
+            v3_vwap_gap_pct=float(_env("V3_VWAP_GAP_PCT", "0.6")),
+            v3_exhaustion_pct=float(_env("V3_EXHAUSTION_PCT", "1.75")),
+            v3_vwap_target=_env("V3_VWAP_TARGET", "false").lower() in ("true", "1", "yes"),
+            v3_entry_cutoff=_parse_time(_env("V3_ENTRY_CUTOFF", "15:45")),
         )
+
+    def __post_init__(self) -> None:
+        # Each strategy keeps its own learning history.
+        if not self.state_path:
+            self.state_path = "state/learning_v3.json" if self.is_v3 else "state/learning.json"
 
     def is_small_account(self, equity: float) -> bool:
         return equity < self.small_account_limit

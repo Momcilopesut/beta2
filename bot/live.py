@@ -121,7 +121,7 @@ class LiveTrader:
         if now_et.time() >= self.s.flatten_time:
             if self.flattened_date != today:
                 log.info("Flatten time reached, closing all positions")
-                self.client.close_all_positions(cancel_orders=True)
+                self._close_own_positions()
                 self.levels.clear()
                 self.flattened_date = today
             return
@@ -131,7 +131,7 @@ class LiveTrader:
         last_equity = float(account.last_equity)
         if self.halted_date != today and equity <= last_equity * (1 - self.s.max_daily_loss_pct):
             log.warning("Daily loss limit hit (equity %.2f vs %.2f). Flattening and halting for today.", equity, last_equity)
-            self.client.close_all_positions(cancel_orders=True)
+            self._close_own_positions()
             self.levels.clear()
             self.halted_date = today
 
@@ -323,6 +323,15 @@ class LiveTrader:
             by_symbol.setdefault(o.symbol, []).append(o)
         return by_symbol
 
+    def _close_own_positions(self) -> None:
+        """Close only this bot's symbols, never positions another bot or person opened."""
+        open_orders = self._open_orders()
+        held = {p.symbol for p in self.client.get_all_positions()}
+        for symbol in self.s.symbols:
+            if symbol in held or open_orders.get(symbol):
+                self._close_symbol(symbol, open_orders.get(symbol, []))
+        self.levels.clear()
+
     def _close_symbol(self, symbol, orders) -> None:
         # Bracket legs reserve the shares, so cancel them before selling.
         for o in orders:
@@ -333,7 +342,13 @@ class LiveTrader:
                     pass  # already filled or cancelled
         if orders:
             time_mod.sleep(1)
-        self.client.close_position(symbol)
+        try:
+            self.client.close_position(symbol)
+        except Exception:
+            if orders:  # cancelled a pending buy that never filled: nothing to close
+                log.info("%s: no position to close after cancelling its orders", symbol)
+            else:
+                raise
         self.levels.pop(symbol, None)
 
 

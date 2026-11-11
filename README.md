@@ -29,6 +29,56 @@ so what you test is what runs.
 
 You can change every number in `.env`.
 
+## v3.1 system (TQQQ / SQQQ)
+
+A second, more complex strategy. You turn it on with `STRATEGY=v3` in `.env`, or with
+`--strategy v3` on any command. It watches QQQ and trades the 3x leveraged funds: TQQQ
+moves about 3 times as much as QQQ, and SQQQ moves 3 times as much in the opposite
+direction. Full rules are in `bot/v3/__init__.py`. In short:
+
+- **10:00 classifier:** QQQ's move since the open and its VWAP slope label the day as
+  a bullish trend, a bearish trend, or choppy ("rotational"). Mixed signals count
+  as choppy.
+- **Strategy 1, Opening Range Breakout (9:50–10:15, once a day):** buy TQQQ or SQQQ
+  (whichever matches QQQ's direction) when it breaks above its 9:30–9:45 high and is
+  above VWAP.
+- **Strategy 2, VWAP Reversion (choppy days):** buy TQQQ or SQQQ when it's stretched
+  2 standard deviations and at least 0.6% below VWAP.
+- **Strategy 3, EMA Pullback (trend days, from about 11:15):** buy the trend fund when
+  it dips to its 21-bar average and closes back above its 9-bar average. After noon
+  it's skipped if QQQ has already moved more than 1.75%.
+- **Managing a trade:** risk 0.5% per trade (1R), stop 0.8% below entry, stop moves to
+  break-even at +0.6R, half sold at +1R (+0.7R after noon, which also locks +0.25R),
+  exit after 30 minutes if a trade stalls, one position at a time, no new trades
+  after a -1% day, and everything closed by 15:50.
+
+The live bot uses the same rule code as the backtester. It checks the open position
+every 15 seconds, saves it so a restart keeps managing it, records real fill prices,
+and keeps protecting an open position even after the daily loss limit trips. Every
+trade is written to `logs/v3_trades.csv`, including its R-multiple and its MAE/MFE
+(how far it went against you and in your favor).
+
+```bash
+python main.py compare --start 2026-01-01 --equity 500        # v3.1 vs the original, same data
+python main.py backtest --strategy v3 --start 2026-01-01 --equity 500 --trades-out v3_bt.csv
+python main.py report --csv v3_bt.csv                         # per-strategy review of those trades
+python main.py paper --strategy v3                            # paper trade v3.1
+python main.py report                                         # review live v3.1 trades so far
+```
+
+Daily learning works for v3.1 too. It has its own history in `state/learning_v3.json`
+and tunes only trade management: stop %, shield, scale level, time stop and VWAP band.
+The entry rules stay as written.
+
+**Run only one bot per Alpaca account.** Each bot only closes its own symbols, but
+the daily loss limit, buying power and day-trade count are shared by the whole
+account.
+
+**Leveraged funds are risky.** TQQQ and SQQQ can move 3% or more on a 1% QQQ move,
+and they lose value over time in choppy markets (that's why the bot never holds them
+overnight). On random test data, v3.1 averaged about 0R per trade. Before trusting it,
+compare it with the original on real data using `python main.py compare`.
+
 ## Small accounts (under $25,000)
 
 The bot switches to small-account mode automatically when equity is below
@@ -163,6 +213,8 @@ bot/backtest.py    bar-by-bar simulator and stats
 bot/data.py        Alpaca / CSV / synthetic bars
 bot/live.py        paper/live trading loop (runs learning after each close)
 bot/learning.py    daily self-improvement: parameter search, holdout check, risk throttle
+bot/v3/            v3.1 system: rules.py (classifier + 3 strategies), position.py (trade
+                   management), backtest.py, live.py, report.py (trade log + review)
 tests/             pytest suite
 ```
 
