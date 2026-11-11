@@ -29,6 +29,37 @@ so what you test is what runs.
 
 You can change every number in `.env`.
 
+## Small accounts (under $25,000)
+
+The bot switches to small-account mode automatically when equity is below
+`SMALL_ACCOUNT_LIMIT`:
+
+- **Fractional shares.** A $500 account can't buy one whole $750 share of SPY, so
+  the bot buys fractions instead (for example 0.33 shares).
+- **Bigger position cap.** Each position can use up to 50% of the account instead of
+  25%, so a trade isn't tiny. The 1%-risk sizing still limits how much is lost if
+  the stop is hit.
+- **Stops watched by the bot.** Alpaca doesn't allow its automatic stop-loss and
+  take-profit orders on fractional shares. The bot checks the price every 30 seconds
+  and sells at market when the stop or target is crossed. In a fast drop, the sale
+  can fill a bit below the stop price. This only works while the bot is running.
+- **Day-trade guard.** US accounts under $25k may make at most 3 day trades in 5
+  business days, and Alpaca rejects the order that would make a 4th. That rejected
+  order could be a sell, leaving a position stuck overnight. So once 3 day trades have
+  been made, the bot opens nothing new until older ones roll out of the 5-day window.
+  The backtester follows the same rule, but it counts each symbol on its own, while
+  Alpaca counts all symbols together.
+
+Over $25,000, the bot buys whole shares, and Alpaca holds the stop and target as a
+bracket order. Settings: `FRACTIONAL_SHARES` (auto/true/false), `SMALL_ACCOUNT_LIMIT`,
+`SMALL_ACCOUNT_MAX_POSITION_PCT` and `PDT_GUARD`.
+
+Backtest at your real account size to see realistic numbers:
+
+```bash
+python main.py backtest --symbol SPY --start 2026-01-01 --equity 500
+```
+
 ## Daily self-improvement
 
 `bot/learning.py` — after each trading day closes, the bot retunes itself:

@@ -9,6 +9,8 @@ Execution model (deliberately conservative):
   and at the close of the last bar of each session as a safety net.
 - Every fill pays `slippage_bps`.
 - After the day's loss reaches MAX_DAILY_LOSS_PCT, no new trades open that day.
+- Small accounts (under SMALL_ACCOUNT_LIMIT) trade fractional shares, and with
+  PDT_GUARD no trade opens once 3 day trades were made in the last 5 sessions.
 """
 
 from __future__ import annotations
@@ -29,7 +31,7 @@ class Trade:
     entry_price: float
     exit_time: pd.Timestamp
     exit_price: float
-    qty: int
+    qty: float
     reason: str
 
     @property
@@ -52,7 +54,7 @@ class BacktestResult:
 
 @dataclass
 class _Position:
-    qty: int
+    qty: float
     entry_price: float
     entry_time: pd.Timestamp
     stop: float
@@ -69,6 +71,10 @@ def run_backtest(
     df = strategy.prepare(bars)
 
     slip = settings.slippage_bps / 10_000
+    fractional = settings.use_fractional(starting_equity)
+    pdt_limited = settings.pdt_guard and settings.is_small_account(starting_equity)
+    sessions: list = []
+    day_trades_by_session: dict = {}
     local_index = df.index.tz_convert(NY)
     dates = local_index.date
     times = local_index.time
@@ -93,6 +99,7 @@ def run_backtest(
             Trade(symbol, position.entry_time, position.entry_price, ts, fill, position.qty, reason)
         )
         position = None
+        day_trades_by_session[current_date] = day_trades_by_session.get(current_date, 0) + 1
         if cash - day_start_equity <= -settings.max_daily_loss_pct * day_start_equity:
             halted = True
 
@@ -123,6 +130,7 @@ def run_backtest(
 
         if bar_date != current_date:
             current_date = bar_date
+            sessions.append(bar_date)
             day_start_equity = cash + (position.qty * o if position else 0.0)
             halted = False
 
@@ -140,9 +148,10 @@ def run_backtest(
         if pending_entry is not None:
             signal_date, signal_atr = pending_entry
             pending_entry = None
-            if position is None and not halted and not past_flatten and signal_date == bar_date:
-                equity = cash
-                plan = plan_entry(settings, equity, o, signal_atr)
+            recent_day_trades = sum(day_trades_by_session.get(d, 0) for d in sessions[-5:])
+            pdt_blocked = pdt_limited and recent_day_trades >= 3
+            if position is None and not halted and not past_flatten and not pdt_blocked and signal_date == bar_date:
+                plan = plan_entry(settings, cash, o, signal_atr, fractional=fractional, buying_power=cash)
                 if plan is not None:
                     fill = o * (1 + slip)
                     cash -= plan.qty * fill

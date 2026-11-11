@@ -41,6 +41,11 @@ class Settings:
     max_position_pct: float = 0.25  # max fraction of equity in a single position
     max_daily_loss_pct: float = 0.03  # stop opening trades after losing this much in a day
     slippage_bps: float = 2.0  # backtest only: cost per fill, in basis points
+    # "auto" = fractional shares when equity is under SMALL_ACCOUNT_LIMIT, "true"/"false" to force
+    fractional_shares: str = "auto"
+    small_account_limit: float = 25_000.0  # US pattern-day-trader threshold
+    small_account_max_position_pct: float = 0.5  # position cap used below that limit
+    pdt_guard: bool = True  # under the limit, never open a 4th day trade in 5 sessions
 
     # Session rules (US/Eastern)
     entry_start: time = time(9, 45)  # skip the noisy open
@@ -75,6 +80,10 @@ class Settings:
             max_position_pct=float(_env("MAX_POSITION_PCT", "0.25")),
             max_daily_loss_pct=float(_env("MAX_DAILY_LOSS_PCT", "0.03")),
             slippage_bps=float(_env("SLIPPAGE_BPS", "2")),
+            fractional_shares=_env("FRACTIONAL_SHARES", "auto").lower(),
+            small_account_limit=float(_env("SMALL_ACCOUNT_LIMIT", "25000")),
+            small_account_max_position_pct=float(_env("SMALL_ACCOUNT_MAX_POSITION_PCT", "0.5")),
+            pdt_guard=_env("PDT_GUARD", "true").lower() not in ("false", "0", "no"),
             entry_start=_parse_time(_env("ENTRY_START", "09:45")),
             entry_end=_parse_time(_env("ENTRY_END", "15:30")),
             flatten_time=_parse_time(_env("FLATTEN_TIME", "15:50")),
@@ -87,6 +96,19 @@ class Settings:
             learn_min_trades=int(_env("LEARN_MIN_TRADES", "10")),
             state_path=_env("STATE_PATH", "state/learning.json"),
         )
+
+    def is_small_account(self, equity: float) -> bool:
+        return equity < self.small_account_limit
+
+    def position_cap_pct(self, equity: float) -> float:
+        return self.small_account_max_position_pct if self.is_small_account(equity) else self.max_position_pct
+
+    def use_fractional(self, equity: float) -> bool:
+        if self.fractional_shares in ("true", "1", "yes"):
+            return True
+        if self.fractional_shares in ("false", "0", "no"):
+            return False
+        return self.is_small_account(equity)
 
     def require_credentials(self) -> None:
         if not self.api_key or not self.api_secret:
