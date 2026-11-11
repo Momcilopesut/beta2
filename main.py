@@ -320,6 +320,37 @@ def cmd_momentumtest(args: argparse.Namespace, settings: Settings) -> None:
     print(momentum_verdict(result)[1])
 
 
+def cmd_combotest(args: argparse.Namespace, settings: Settings) -> None:
+    from datetime import date, timedelta
+
+    from bot.combo import combo_verdict, format_combo_report, run_combo_backtest
+    from bot.momentum import UNIVERSE as MOM
+    from bot.swing import UNIVERSE as SWING
+    from bot.swing import check_coverage, fetch_daily_yahoo, synthetic_daily
+
+    symbols = tuple(dict.fromkeys(MOM + SWING))
+    if args.synthetic:
+        data = synthetic_daily(years=6, seed=3, start="2018-01-01", symbols=symbols)
+        start, end = date(2019, 6, 1), max(data["SPY"].index)
+    else:
+        if not args.start or not args.end:
+            raise SystemExit("--start and --end are required (or use --synthetic)")
+        start, end = _date(args.start).date(), _date(args.end).date()
+        data = {sym: fetch_daily_yahoo(settings, sym, start - timedelta(days=420), end) for sym in symbols}
+        problems = [p for p in check_coverage(data, start) if "no data" in p]
+        if problems:
+            raise SystemExit("Missing data: " + "; ".join(problems))
+
+    print("=" * 70)
+    print("RULE (decided before seeing this data): the 50/50 combination PASSES if its")
+    print("Sharpe ratio is higher than momentum alone AND its max drawdown is no worse.")
+    print("=" * 70)
+    result = run_combo_backtest(data, start, end, args.equity, settings.slippage_bps, MOM)
+    print(format_combo_report(result, args.equity))
+    print("=" * 70)
+    print(combo_verdict(result))
+
+
 def cmd_report(args: argparse.Namespace, settings: Settings) -> None:
     from bot.v3.report import DEFAULT_LOG, audit
 
@@ -420,6 +451,12 @@ def main() -> None:
     mo.add_argument("--synthetic", action="store_true", help="Use random-walk daily bars (no internet needed)")
     mo.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
 
+    co = sub.add_parser("combotest", help="Test swing + momentum combined 50/50 (Yahoo data)")
+    co.add_argument("--start", help="Test start YYYY-MM-DD")
+    co.add_argument("--end", help="Test end YYYY-MM-DD")
+    co.add_argument("--synthetic", action="store_true", help="Use random-walk daily bars (no internet needed)")
+    co.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
+
     rp = sub.add_parser("report", help="Per-strategy review of the v3.1 trade log")
     rp.add_argument("--csv", help="Trade log to review (default logs/v3_trades.csv)")
     rp.add_argument("--last", type=int, help="Only the most recent N trades")
@@ -455,6 +492,8 @@ def main() -> None:
         cmd_swing_trade(args, settings)
     elif args.command == "momentumtest":
         cmd_momentumtest(args, settings)
+    elif args.command == "combotest":
+        cmd_combotest(args, settings)
     elif args.command == "report":
         cmd_report(args, settings)
     else:
