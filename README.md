@@ -117,6 +117,25 @@ is in `logs/swing.log`. Run it **instead of** the day-trading bots, because the 
 also trades SPY and QQQ on the same account. There's no stop-loss (the tested rules
 don't use one); the 10-day limit caps how long a losing position is held.
 
+## ETF momentum test (monthly)
+
+`bot/momentum.py` is a monthly strategy across asset classes (Mebane Faber's
+"relative strength" rules, with standard values and no tuning):
+
+- Universe: SPY, QQQ, IWM, EFA, EEM, TLT, IEF, GLD, DBC, VNQ.
+- At each month-end, score every ETF by the average of its 3-, 6- and 12-month
+  returns and hold the top 3, a third of the account each.
+- An ETF below its 10-month average isn't bought; that third stays in cash.
+- Rebalance at the next open. That's about one trade day a month, with no day trades.
+
+It's judged against simply holding all 10 ETFs equally. It passes if its Sharpe ratio
+(return per unit of risk) is higher **and** its worst drop is smaller. It's tested
+once, over the whole period, using Yahoo Finance data (`pip install yfinance`):
+
+```bash
+python main.py momentumtest --start 2008-01-01 --end 2026-11-10 --equity 500
+```
+
 ## Small accounts (under $25,000)
 
 The bot switches to small-account mode automatically when equity is below

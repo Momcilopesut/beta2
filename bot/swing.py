@@ -119,12 +119,14 @@ def check_coverage(data: dict[str, pd.DataFrame], start: date) -> list[str]:
     return problems
 
 
-def synthetic_daily(years: float = 3, seed: int = 1, start: str = "2021-01-04") -> dict[str, pd.DataFrame]:
+def synthetic_daily(
+    years: float = 3, seed: int = 1, start: str = "2021-01-04", symbols: tuple = UNIVERSE
+) -> dict[str, pd.DataFrame]:
     """Random-walk daily bars (slight upward drift, no dip-buying edge) for offline tests."""
     rng = np.random.default_rng(seed)
     days = pd.bdate_range(start, periods=int(252 * years))
     out = {}
-    for k, sym in enumerate(UNIVERSE):
+    for k, sym in enumerate(symbols):
         rets = rng.normal(0.0004, 0.011, len(days))
         close = 100 * (1 + k * 0.5) * np.cumprod(1 + rets)
         open_ = np.concatenate([[close[0]], close[:-1]]) * (1 + rng.normal(0, 0.002, len(days)))

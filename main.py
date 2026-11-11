@@ -289,6 +289,37 @@ def cmd_swing_trade(args: argparse.Namespace, settings: Settings) -> None:
         trader.run_forever()
 
 
+def cmd_momentumtest(args: argparse.Namespace, settings: Settings) -> None:
+    from datetime import date, timedelta
+
+    from bot.momentum import UNIVERSE, format_momentum_report, momentum_verdict, run_momentum_backtest
+    from bot.swing import check_coverage, fetch_daily_yahoo, synthetic_daily
+
+    if args.synthetic:
+        data = synthetic_daily(years=6, seed=3, start="2018-01-01", symbols=UNIVERSE)
+        start, end = date(2019, 6, 1), max(data["SPY"].index)
+    else:
+        if not args.start or not args.end:
+            raise SystemExit("--start and --end are required (or use --synthetic)")
+        start, end = _date(args.start).date(), _date(args.end).date()
+        data = {sym: fetch_daily_yahoo(settings, sym, start - timedelta(days=420), end) for sym in UNIVERSE}
+        problems = [p for p in check_coverage(data, start) if "no data" in p]
+        if problems:
+            print("Missing data:")
+            for p in problems:
+                print("  " + p)
+            raise SystemExit(1)
+
+    print("=" * 70)
+    print("RULE (decided before seeing this data): momentum PASSES if its Sharpe ratio")
+    print("is higher AND its max drawdown is smaller than holding all 10 ETFs equally.")
+    print("=" * 70)
+    result = run_momentum_backtest(data, start, end, args.equity, settings.slippage_bps)
+    print(format_momentum_report(result))
+    print("=" * 70)
+    print(momentum_verdict(result)[1])
+
+
 def cmd_report(args: argparse.Namespace, settings: Settings) -> None:
     from bot.v3.report import DEFAULT_LOG, audit
 
@@ -383,6 +414,12 @@ def main() -> None:
     swl.add_argument("--once", action="store_true", help="Do today's run now and exit (market must be open)")
     swl.add_argument("--i-understand-the-risk", action="store_true")
 
+    mo = sub.add_parser("momentumtest", help="Test the monthly ETF momentum strategy (Yahoo data)")
+    mo.add_argument("--start", help="Test start YYYY-MM-DD")
+    mo.add_argument("--end", help="Test end YYYY-MM-DD")
+    mo.add_argument("--synthetic", action="store_true", help="Use random-walk daily bars (no internet needed)")
+    mo.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
+
     rp = sub.add_parser("report", help="Per-strategy review of the v3.1 trade log")
     rp.add_argument("--csv", help="Trade log to review (default logs/v3_trades.csv)")
     rp.add_argument("--last", type=int, help="Only the most recent N trades")
@@ -416,6 +453,8 @@ def main() -> None:
         cmd_swingtest(args, settings)
     elif args.command in ("swing-paper", "swing-live"):
         cmd_swing_trade(args, settings)
+    elif args.command == "momentumtest":
+        cmd_momentumtest(args, settings)
     elif args.command == "report":
         cmd_report(args, settings)
     else:
