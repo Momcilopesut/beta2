@@ -192,6 +192,18 @@ def cmd_compare(args: argparse.Namespace, settings: Settings) -> None:
     print("Fewer than ~100 trades or a few months of data is not enough to call a winner.")
 
 
+def cmd_diagnose(args: argparse.Namespace, settings: Settings) -> None:
+    from bot.v3.backtest import format_v3_report, run_v3_backtest
+    from bot.v3.diagnose import diagnose
+
+    v3 = _with_learned(replace(settings, strategy="v3", state_path=""), args.base_params)
+    data = _v3_data(args, v3)
+    result = run_v3_backtest(data, v3, starting_equity=args.equity)
+    print(format_v3_report(result))
+    print()
+    print(diagnose(result, data, v3))
+
+
 def cmd_report(args: argparse.Namespace, settings: Settings) -> None:
     from bot.v3.report import DEFAULT_LOG, audit
 
@@ -257,6 +269,14 @@ def main() -> None:
     cmp.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
     cmp.add_argument("--base-params", action="store_true", help="Ignore learned params, use .env values")
 
+    dg = sub.add_parser("diagnose", help="Explain where v3.1 wins and loses (backtest breakdown)")
+    dg.add_argument("--start", help="Start date YYYY-MM-DD (Alpaca download)")
+    dg.add_argument("--end", help="End date YYYY-MM-DD")
+    dg.add_argument("--synthetic", action="store_true", help="Use random-walk bars (no API keys needed)")
+    dg.add_argument("--days", type=int, default=60, help="Days of synthetic data")
+    dg.add_argument("--equity", type=float, default=500.0, help="Starting equity (default $500)")
+    dg.add_argument("--base-params", action="store_true", help="Ignore learned params, use .env values")
+
     rp = sub.add_parser("report", help="Per-strategy review of the v3.1 trade log")
     rp.add_argument("--csv", help="Trade log to review (default logs/v3_trades.csv)")
     rp.add_argument("--last", type=int, help="Only the most recent N trades")
@@ -282,6 +302,8 @@ def main() -> None:
         cmd_params(args, settings)
     elif args.command == "compare":
         cmd_compare(args, settings)
+    elif args.command == "diagnose":
+        cmd_diagnose(args, settings)
     elif args.command == "report":
         cmd_report(args, settings)
     else:

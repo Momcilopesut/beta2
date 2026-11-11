@@ -267,3 +267,14 @@ def test_live_survives_data_errors(tmp_path, monkeypatch):
         trader.tick(now=at(10, 0).astimezone(ZoneInfo("UTC")))
     # run() catches and logs this and keeps looping; the trader state is still usable
     assert trader.position is None
+
+
+def test_diagnose_runs():
+    from bot.v3.diagnose import diagnose, forward_r
+
+    data = synthetic_leveraged(days=20, seed=4)
+    result = run_v3_backtest(data, S, starting_equity=500)
+    fwd = forward_r(result, data, S)
+    assert len(fwd) == len(result.trades)
+    text = diagnose(result, data, S)
+    assert "After entry, ignoring the bot's exits" in text and "By strategy and exit reason" in text
